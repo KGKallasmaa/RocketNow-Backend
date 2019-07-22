@@ -1,0 +1,17 @@
+{
+  "env": {
+    "MONGO_USER": "admin",
+    "MONGO_PASSWORD": "GHoeyfJU8rTrw4px",
+    "MONGO_DB": "nonoline-db",
+    "PERSONAL_JWT_KEY": "Am4tCb3N2JhSG1YT6Vdj3sovqEhqgIoTOWgXpCjq9em9VcXojwjsJH9S0TAGXQI2uLk7WRDcdlhJ1FnXFa8MBw7pg1SZr4lMEvsbHR5T3rutExYsy1qN0qnMpkmkU47UaUHPK3npZXk23B3tlfivpIV29aPi7MFKfCSNm5k7acG3kOVFqud2kyUhpyCgXcIbLUjypk4I",
+    "BUSINESS_JWT_KEY": "bPHoyZ1jsirHC7MxKVk3fr0mPmR9T8KfmeoIH5ERnbYGKnOD7NwSB4GJ5tCrt3gy46sXiFCxix0m1yXRLmq0DCpPbBw0wpYgiGERKlaag0fokIBEB5skwF3QzwySu8Wdjpe2qAgFqj5YVYyIkkg0gnBR7SgHhNe9jhKRcSFVXQLfsVUCr97bibldoIrjt5Z1wvuyEXSr",
+    "CLOUDINARY_CLOUD_NAME":"dl7zea2jd",
+    "CLOUDINARY_API_PUBLIC":"275697541351515",
+    "CLOUDINARY_API_SECRET":"LERjYF3psuuf3mvEm26VRJOJHhg",
+    "STRIPE_API_SECRET": "sk_test_pBnnOLzSC3Jo0E3RDmE5S1Q5",
+    "SERVER_URL": "http://localhost:3000/graphql",
+    "CLIENT_URL": "http://localhost:3001",
+    "FIXER_IO_API_KEY": "f21b1e92292d46a07e6adb4b4fdc0782",
+    "SHIPPO_API_KEY": "shippo_test_2b28c74c4e294d7e7be2315a9a844174f6c88515"
+  }
+}
