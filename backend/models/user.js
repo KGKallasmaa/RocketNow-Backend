@@ -4,8 +4,8 @@ const Schema = mongoose.Schema;
 
 const business_userSchema = new Schema({
     businessname: {
-        type:String,
-        required:true
+        type: String,
+        required: true
     },
     email: {
         type: String,
@@ -18,20 +18,72 @@ const business_userSchema = new Schema({
 });
 
 const regular_userSchema = new Schema({
-    fullname:{
-      type:String,
-      required:true
+    fullname: {
+        type: String,
+        required: true
+    },
+    image_URL: {
+        type: String,
+        required: true,
+        default: "https://res.cloudinary.com/dl7zea2jd/image/upload/v1564235106/defaultPictures/astronaut_aexv9c.png"
     },
     email: {
-      type: String,
-      unique:true,
-      required: true
+        type: String,
+        unique: true,
+        required: true
+    },
+    isVerified: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
+    verificationCode: {
+        type: String,
+        required: false,
+    },
+    isResettingPassword: {
+        type: Boolean,
+        required: false,
+        default: false
+    },
+    passwordResetCode: {
+        type: String,
+        required: false,
+    },
+    isActive: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
+    isCustomer: {
+        type: Boolean,
+        required: true,
+        default: false
     },
     password: {
-      type: String,
-      required: true
+        type: String,
+        required: false
+    },
+    signupTimestamp_UNIX: {
+        type: String,
+        required: true,
+        default: new Date().getTime()
+    },
+    lastLoginTimestamp_UNIX: {
+        type: String,
+        required: false,
+    },
+    signupMethod: {
+        type: String,
+        required: true,
+        default: "Regular"
+    },
+    balance_EUR: {
+        type: Number,
+        required: true,
+        default: 0
     }
-  });
+});
 
 
 module.exports = {

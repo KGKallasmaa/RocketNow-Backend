@@ -7,8 +7,19 @@ module.exports = buildSchema(`
 type User {
   _id: ID!
   fullname:String!
+  image_URL:String!
   email: String!
-  password: String!
+  isVerified:Boolean!
+  verificationCode:String
+  isResettingPassword:Boolean
+  passwordResetCode:String
+  isActive:Boolean!
+  isCustomer:Boolean!
+  password:String
+  signupTimestamp_UNIX:String!
+  lastLoginTimestamp_UNIX:String
+  signupMethod:String!
+  balance_EUR:Float!
 }
 type BusinessUser {
   _id: ID!
@@ -17,15 +28,20 @@ type BusinessUser {
   password: String!
 }
 type AuthData {
-  userId: ID!
+  userFullName: String!
+  userImage_URL:String!
   token: String!
-  tokenExpiration:String!
+  tokenExpiration:String!  
 }
+
 input UserInput {
-  fullname: String!
   email: String!
-  password: String!
+  password: String
+  signupMethod:String!
+  image_URL:String
+  fullname: String
 }
+
 input BusinessUserInput {
   businessname: String!
   email: String!
@@ -225,20 +241,22 @@ input searchInput{
 """
 type RootQuery {
     product_feed(jwt_token:String!): [Good!]!
-    businessLogin(email: String!, password: String!): AuthData!
-    login(email: String!, password: String!,old_cart_id:String): AuthData!
-    individualGood(id:ID!):Good!
     search(searchInput:searchInput): [Good!]
     trending(country:String!):[Good!]
     recommend(jwt_token:String!,nr:Int!):[Good!]
-    
     autocomplete(query:String!):[Good!]
+   
+    businessLogin(email: String!, password: String!): AuthData!
+    login(email: String!, password: String!,old_cart_id:String,image_URL:String,loginMethod:String!,fullname:String): AuthData!    
+ 
+    individualUser(jwt_token: String!): User!
+    individualGood(id:ID!):Good!
     allGeneralCategories:[GeneralCategory!]!
     getAllMyListedGoods(jwt_token:String!): [Good!]
-    individualUser(jwt_token: String!): User!
     individualCart(jwt_token: String!): ShoppingCart!
-    numberOfGoodsInCartAndSubtotal(jwt_token: String!):[Float!]!
     ParcelDeliveryLocations(UserLatCoordinate: Float!,UserLonCoordinate: Float!):[ParcelDeliveryLocation!]
+    numberOfGoodsInCartAndSubtotal(jwt_token: String!):[Float!]!
+    
     orderGoods(orderInput: finalOrderInput!):Order!
     DeliveryCost(deliverycostInput:OrderInput):Float!
     DeliveryTimeEstimate(deliverytimeEstimateInput:OrderInput):String!
@@ -248,12 +266,17 @@ type RootQuery {
 """
 type RootMutation {
     createBusinessUser(userInput: BusinessUserInput): BusinessUser!
-    createUser(userInput: UserInput): User!
+    createUser(userInput: UserInput): String!
+    verifyEmail(token:String):AuthData!
+    resetPassword(email:String,password:String,mode:String!,token:String):Boolean!
+    
+    addParcelDeliveryLocation(provider:String!,name:String!,country:String!,x_coordinate:Float!,y_coordinate:Float!):ParcelDeliveryLocation!
     createGeneralCategory(name: String!):GeneralCategory!
+    
     addPhysicalGood(goodInput: goodInput): Good!
     addToCart(cart_identifier: String!,good_id: ID!,quantity:Int!): ShoppingCart!
     showCheckout(checkoutInput:OrderInput):StripeCheckout!
-    addParcelDeliveryLocation(provider:String!,name:String!,country:String!,x_coordinate:Float!,y_coordinate:Float!):ParcelDeliveryLocation!
+    
 }
 
 schema {

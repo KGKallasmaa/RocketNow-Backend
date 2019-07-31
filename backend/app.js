@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const graphqlHttp = require('express-graphql');
 const mongoose = require('mongoose');
 let cors = require('cors');
+const ip = require("ip");
 
 
 
@@ -70,7 +71,7 @@ mongoose
     .then(() => {
         console.log('Successfully connected to the database.');
         const PORT = 3000;
-        const HOST = '0.0.0.0';
+        const HOST = ip.address();
         app.listen(PORT, HOST);
        // app.listen(PORT);
         console.log(`The backend is running on http://${HOST}:${PORT}`);
