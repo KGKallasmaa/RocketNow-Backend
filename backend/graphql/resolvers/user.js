@@ -300,6 +300,7 @@ module.exports = {
         if (!decoded) {
             return Error('JWT was not decoded properly');
         }
+
         const user = await RegularUser.findById(decoded.userId);
         if (!user) {
             return Error('User does not exist');
@@ -356,7 +357,7 @@ module.exports = {
                 }
             }, {upsert: true}, function (err) {
             });
-            await sendEmail(token, result.email, result._id, "resetPassword");
+            await sendEmail(token, user.email, user._id, "resetPassword");
             return Error("Please complete your password reset. We sent another reset email.")
         }
         if (user.signupMethod !== loginMethod) {
@@ -399,7 +400,7 @@ module.exports = {
         const current_time = new Date().getTime();
         const expires_in = (user.signupMethod === "Facebook") ? 6042000 : 3600000; //expires in 100 minutes or 60 minutes
         const expiresIn_as_String = (current_time + expires_in).toString();
-        const token = jwt.sign({userId: user.id}, process.env.PERSONAL_JWT_KEY, {expiresIn: expiresIn_as_String});
+        const token = jwt.sign({userId: user._id}, process.env.PERSONAL_JWT_KEY, {expiresIn: expiresIn_as_String});
         return {
             userFullName: user.fullname,
             userImage_URL: user.image_URL,
@@ -418,6 +419,7 @@ module.exports = {
             const hashedPassword = await bcrypt.hash(args.userInput.password, 12);
             const user = new BusinessUser({
                 businessname: args.userInput.businessname,
+                nr:await BusinessUser.find().length+1,
                 email: args.userInput.email,
                 password: hashedPassword
             });
@@ -474,7 +476,7 @@ module.exports = {
                 $set: {verificationCode: token,}
             }, {upsert: true}, function (err) {
             });
-            await sendEmail(token, result.email, result._id, "verifyEmail");
+            await sendEmail(token,user.email, user._id, "verifyEmail");
             return Error("Your verification code has expired. We sent a new email");
         }
         ;

@@ -3,6 +3,11 @@ const Schema = mongoose.Schema;
 
 
 const business_userSchema = new Schema({
+    nr: {
+        type: Number,
+        unique:true,
+        required: true
+    },
     businessname: {
         type: String,
         required: true

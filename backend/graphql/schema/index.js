@@ -23,6 +23,7 @@ type User {
 }
 type BusinessUser {
   _id: ID!
+  nr:Int!
   businessname: String!
   email: String!
   password: String!
@@ -74,6 +75,7 @@ type OrderGood {
 }
 type Good {
   _id: ID!
+  nr:Int!
   title:String!
   description:String!
   quantity: Int!
@@ -82,9 +84,8 @@ type Good {
   listing_price: Float!
   listing_timestamp: String!
   general_category: GeneralCategory!
-  main_image_cloudinary_public_id: String!
   main_image_cloudinary_secure_url:String!
-  other_images_cloudinary_public_id: [String!]
+  other_images_cloudinary_secure_url: [String!]
   currency: String!
   keywords:[String!]!
   seller: BusinessUser!
@@ -243,14 +244,14 @@ type RootQuery {
     product_feed(jwt_token:String!): [Good!]!
     search(searchInput:searchInput): [Good!]
     trending(country:String!):[Good!]
-    recommend(jwt_token:String!,nr:Int!):[Good!]
+    recommend(jwt_token:String,nr:Int!):[Good!]
     autocomplete(query:String!):[Good!]
    
     businessLogin(email: String!, password: String!): AuthData!
     login(email: String!, password: String!,old_cart_id:String,image_URL:String,loginMethod:String!,fullname:String): AuthData!    
  
     individualUser(jwt_token: String!): User!
-    individualGood(id:ID!):Good!
+    individualGood(nr:Int!,jwt_token:String):Good!
     allGeneralCategories:[GeneralCategory!]!
     getAllMyListedGoods(jwt_token:String!): [Good!]
     individualCart(jwt_token: String!): ShoppingCart!

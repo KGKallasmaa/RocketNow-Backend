@@ -69,6 +69,7 @@ module.exports = {
     recommend: async ({jwt_token,nr}) => {
         //TODO: develop real funcionality. Use Recomendbee
         let goods = await Good.find();
+
         goods = goods.slice(0,nr);
 
         return goods.map(good => {

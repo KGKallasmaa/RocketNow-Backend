@@ -7,6 +7,7 @@ const Good = good_schemas.Good;
 
 const user_schemas = require('../../models/user');
 const BusinessUser = user_schemas.BusinessUser;
+const RegularUser = user_schemas.RegularUser;
 
 const category_schemas = require('../../models/category');
 const GeneralCategory = category_schemas.GeneralCategory;
@@ -19,6 +20,11 @@ const stopwords = require('stopword');
 
 
 const stripe = require('stripe')(process.env.STRIPE_API_SECRET);
+
+const recombee = require('recombee-api-client');
+const rqs = recombee.requests;
+
+const client = new recombee.ApiClient((process.env.NODE_MODE === "Production") ? process.env.RECCOMENATION_PROD_DB : process.env.RECCOMENATION_DEV_DB, (process.env.NODE_MODE === "Production") ? process.env.RECCOMENDATION_PROD_PRIVATE_TOKEN : process.env.RECCOMENDATION_DEV_PRIVATE_TOKEN);
 
 
 function get_keywords(title, description, general_category_name, seller_name) {
@@ -86,10 +92,11 @@ module.exports = {
 
             //Add good to our database
             const new_good = new Good({
+                nr:await Good.find().length+1,
                 title: args.goodInput.title,
                 description: args.goodInput.description,
                 quantity: +args.goodInput.quantity,
-                booked:0, //When the good is added then no orders have been made
+                booked: 0, //When the good is added then no orders have been made
                 current_price: +args.goodInput.current_price,
                 listing_price: +args.goodInput.listing_price,
                 listing_timestamp: +parseInt(args.goodInput.listing_timestamp, 10),
@@ -108,88 +115,91 @@ module.exports = {
 //TODO: add past data to mongo
 
 
+            if (custom_attribute_names.length === custom_attribute_values.length && (custom_attribute_values.length !== 0 && custom_attribute_names !== 0)) {
+                new_good.custom_attribute_values = filtered_custom_attribute_values;
+                new_good.custom_attribute_names = filtered_custom_attribute_names;
+            }
 
+            const result = await new_good.save();
 
-    if (custom_attribute_names.length === custom_attribute_values.length && (custom_attribute_values.length !== 0 && custom_attribute_names !== 0)) {
-        new_good.custom_attribute_values = filtered_custom_attribute_values;
-        new_good.custom_attribute_names = filtered_custom_attribute_names;
-    }
+            // Add Good information to the Search Index
+            for (let i = 0; i < keywords.length; i++) {
+                const current_keyword = keywords[i];
+                let current_index_value = await Index.findOne({term: current_keyword});
+                //Is this keyword in the index?
+                if (current_index_value) {
+                    //Add a new page to that keyword
+                    current_index_value.pages.push(result);
+                    current_index_value.save();
+                } else {
+                    const new_index_entry = new Index({
+                        term: current_keyword,
+                        pages: Array(result)
+                    });
+                    new_index_entry.save();
+                }
+            }
 
-    const result = await new_good.save();
+            let image_array = [args.goodInput.main_image_cloudinary_secure_url];
+            //TODO:add one line solution
+            for (let index = 0; index < args.goodInput.other_images_cloudinary_secure_url.length; index++) {
+                const element = args.goodInput.other_images_cloudinary_secure_url[index];
+                image_array.push(element);
+            }
 
-    // Add Good information to the Search Index
-    for (let i = 0; i < keywords.length; i++) {
-        const current_keyword = keywords[i];
-        let current_index_value = await Index.findOne({term: current_keyword});
-        //Is this keyword in the index?
-        if (current_index_value) {
-            //Add a new page to that keyword
-            current_index_value.pages.push(result);
-            current_index_value.save();
-        } else {
-            const new_index_entry = new Index({
-                term: current_keyword,
-                pages: Array(result)
+            //Add product to Stripes database
+            const product = await stripe.products.create({
+                id: new_good.id,
+                name: new_good.title,
+                type: 'good',
+                description: new_good.description,
+                package_dimensions: {
+                    height: result.height_in,
+                    length: result.length_in,
+                    weight: result.weight_oz,
+                    width: result.width_in
+                },
+                images: image_array,
+                metadata: {
+                    SellerName: seller.businessname,
+                    SellerEmail: seller.email
+                }
             });
-            new_index_entry.save();
+            console.log("Product" + JSON.stringify(product));
+
+            //Addding sku infonormation
+            const sku = await stripe.skus.create({
+                id: new_good.id,
+                product: product.id,
+                image: args.goodInput.main_image_cloudinary_secure_url,
+                price: Math.ceil(args.goodInput.current_price * 100),
+                currency: (args.goodInput.currency).toLowerCase(),
+                package_dimensions: {
+                    height: result.height_in,
+                    length: result.length_in,
+                    weight: result.weight_oz,
+                    width: result.width_in
+                },
+                inventory: {
+                    quantity: args.goodInput.quantity,
+                    type: "finite",
+                }
+            });
+            console.log("sku:" + JSON.stringify(sku));
+
+            return transformGood(result);
+        } catch
+            (err) {
+            throw err;
         }
+    },
+    individualGood: async ({nr,jwt_token}) => {
+        const good = await Good.findOne({nr:nr});
+        if (!good){
+            return Error("Good was not found");
+        }
+        //TODO: integrate reccomendations
+        console.log("good #"+good._id+" was just viewed.");
+        return transformGood(good);
     }
-
-    let image_array = [args.goodInput.main_image_cloudinary_secure_url];
-    //TODO:add one line solution
-    for (let index = 0; index < args.goodInput.other_images_cloudinary_secure_url.length; index++) {
-        const element = args.goodInput.other_images_cloudinary_secure_url[index];
-        image_array.push(element);
-    }
-
-    //Add product to Stripes database
-    const product = await stripe.products.create({
-        id: new_good.id,
-        name: new_good.title,
-        type: 'good',
-        description: new_good.description,
-        package_dimensions: {
-            height: result.height_in,
-            length: result.length_in,
-            weight: result.weight_oz,
-            width: result.width_in
-        },
-        images: image_array,
-        metadata: {
-            SellerName: seller.businessname,
-            SellerEmail: seller.email
-        }
-    });
-    console.log("Product"+JSON.stringify(product));
-
-    //Addding sku infonormation
-    const sku = await stripe.skus.create({
-        id:new_good.id,
-        product: product.id,
-        image: args.goodInput.main_image_cloudinary_secure_url,
-        price: Math.ceil(args.goodInput.current_price * 100),
-        currency: (args.goodInput.currency).toLowerCase(),
-        package_dimensions: {
-            height: result.height_in,
-            length: result.length_in,
-            weight: result.weight_oz,
-            width: result.width_in
-        },
-        inventory: {
-            quantity: args.goodInput.quantity,
-            type: "finite",
-        }
-    });
-    console.log("sku:"+JSON.stringify(sku));
-
-    return transformGood(result);
-} catch
-    (err) {
-    throw err;
-}
-},
-individualGood: async ({id}) => {
-let good = await Good.findById(id);
-return transformGood(good);
-}
 };

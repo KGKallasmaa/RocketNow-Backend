@@ -3,6 +3,11 @@ const Schema = mongoose.Schema;
 
 
 const goodSchema = new Schema({
+    nr: {
+        type: Number,
+        unique:true,
+        required: true
+    },
     title: {
         type: String,
         required: true
@@ -35,15 +40,11 @@ const goodSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'GeneralCategory'
     },
-    main_image_cloudinary_public_id: {
-        type: String,
-        required: true
-    },
     main_image_cloudinary_secure_url:{
         type: String,
         required: true
     },
-    other_images_cloudinary_public_id: [{
+    other_images_cloudinary_secure_url: [{
         type: String,
         required: false
     }],
