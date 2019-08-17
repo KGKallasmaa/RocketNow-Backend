@@ -6,6 +6,12 @@ const ShoppingCart = cart_schemas.ShoppingCart;
 const shipping_schema = require('../../models/shipping');
 const ParcelDeliveryLocation = shipping_schema.ParcelDeliveryLocation;
 
+const address_schema = require('../../models/address');
+const OrderAdress = address_schema.OrderAddress;
+
+const order_schema = require('../../models/order');
+const Order = order_schema.Order;
+
 const good_schemas = require('../../models/good');
 const Good = good_schemas.Good;
 const CartGood = good_schemas.CartGood;
@@ -76,16 +82,13 @@ async function test() {
 }
 
 async function findUser(jwt_token) {
-    const KEY = process.env.PERSONAL_JWT_KEY;
-    const decoded = jwt.decode(jwt_token, KEY);
+    const decoded = jwt.decode(jwt_token, process.env.PERSONAL_JWT_KEY);
     if (!decoded) {
-        throw new Error('JWT was not decoded properly');
+        //user has not loggeed in
+        return null;
     }
-    const user = await RegularUser.findById(decoded.userId);
-    if (!user) {
-        throw new Error('User was not found.');
-    }
-    return user;
+    return await RegularUser.findById(decoded.userId);
+
 }
 
 async function boxify(cartgoods, method) {
@@ -484,7 +487,8 @@ async function ParcelDeliveryShippingCostEstimate(ParcelDeliveryLocationId, shop
 
     const parcelLocation = await ParcelDeliveryLocation.findById(ParcelDeliveryLocationId);
     if (!parcelLocation) {
-        throw Error("Parcel delivery with id " + ParcelDeliveryLocationId + " was not found")
+        console.error("Parcel delivery with id " + ParcelDeliveryLocationId + " was not found");
+        return -1;
     }
     const Country = parcelLocation.country;
 
@@ -676,72 +680,90 @@ module.exports = {
         //The cost, that this function calculates, is final. The user will not be charged more, if the cost turns out to be bigger
 
         const user = await findUser(args.deliverycostInput.jwt_token);
-        const shoppingcart = await ShoppingCart.findOne({cart_identifier: user._id});
-
-        let ShippingCost = 0;
-
-        //Add real data
+        let shoppingcart;
+        if (user) {
+            shoppingcart = await ShoppingCart.findOne({cart_identifier: user._id});
+        } else {
+            shoppingcart = await ShoppingCart.findOne({cart_identifier: args.deliverycostInput.jwt_token});
+        }
+        //User hasn't added any goods to their cart
+        if (!shoppingcart) {
+            return 0;
+        }
         switch (args.deliverycostInput.ShippingMethod) {
             case "ParcelDelivery":
-                ShippingCost = await ParcelDeliveryShippingCostEstimate(args.deliverycostInput.ParcelDeliveryLocation, shoppingcart);
-                break;
+                return Math.ceil(100 * await ParcelDeliveryShippingCostEstimate(args.deliverycostInput.ParcelDeliveryLocation, shoppingcart)) / 100;
             case "AddressDelivery":
-                ShippingCost = await AddressDeliveryShippingCostEstimate(args.deliverycostInput.ShippingCountry, shoppingcart);
-                break;
+                return Math.ceil(100 * await AddressDeliveryShippingCostEstimate(args.deliverycostInput.ShippingCountry, shoppingcart)) / 100;
             default:
-                throw new Error("Shipping method " + args.deliverycostInput.ShippingMethod + " is not supported.")
+                return Error("Shipping method " + args.deliverycostInput.ShippingMethod + " is not supported.")
         }
-
-        //Return the final value, reformated for Stripe
-        return Math.ceil(100 * ShippingCost) / 100;
-
     },
     DeliveryTimeEstimate: async args => {
+        const ONE_DAY_IN_MS = 86400000;
+        const ONE_HOUR_IN_MS = 3600000;
         /*
        TODO: debugg
         //TODO: develop
        This method calculates a rough estimate of the arrival time of the
        NoNoLine is a service provider, which means it doesn't itself physically move products.
-       The results depends mostly on partners (Businesses that sell on NoNoLine) and 3rd party service partners (e.g Omniva)
+       The results depends mostly on partners (Businesses that sell on RocketNow) and 3rd party service partners (e.g Omniva)
         */
-        const jwt_token =args.deliverytimeEstimateInput.jwt_token;
-        const ShippingName = args.deliverytimeEstimateInput.ShippingName;
-        const ShippingAddressLine1 = args.deliverytimeEstimateInput.ShippingAddressLine1;
-        const ShippingAddressLine2 = args.deliverytimeEstimateInput.ShippingAddressLine2;
-        const ShippingCity = args.deliverytimeEstimateInput.ShippingCity;
-        const ShippingRegion = args.deliverytimeEstimateInput.ShippingRegion;
-        const ShippingZip = args.deliverytimeEstimateInput.ShippingZip;
+        const jwt_token = args.deliverytimeEstimateInput.jwt_token;
         const ShippingCountry = args.deliverytimeEstimateInput.ShippingCountry;
         const ParcelDeliveryLocation = args.deliverytimeEstimateInput.ParcelDeliveryLocation;
         const ShippingMethod = args.deliverytimeEstimateInput.ShippingMethod;
-        const SHIPPING_ValuesAreValid = args.deliverytimeEstimateInput.SHIPPING_ValuesAreValid;
-        const TimezoneOffset_M = args.deliverytimeEstimateInput.TimezoneOffset_M;
+        const TimezoneOffset_MS = args.deliverytimeEstimateInput.TimezoneOffset_M*60000;
 
-
-        //Inital values - User local Time
-        const localOffset = (-1) * TimezoneOffset_M * 60000;
-        const CurrentTimestamp = Math.round(new Date(new Date().getTime() + localOffset).getTime() / 1000);
-
-
-        const CurrentDate = new Date(CurrentTimestamp);
-        const CurrentMonth = CurrentDate.getUTCMonth() + 1; //months from 1-12
-        const CurrentDay = CurrentDate.getUTCDate(); // e.g 01
-        const CurrentYear = CurrentDate.getUTCFullYear();
-        const CurrentDayOfWeek = CurrentDate.getUTCDay(); // 1-Monday
-        const CurrentHour = CurrentDate.getUTCHours();
-        const CurrentMinute = CurrentDate.getUTCMinutes();
+        let deliveryTime_UTC = new Date().getTime();
 
         //1. Find the user
+        const decoded = jwt.decode(jwt_token, process.env.PERSONAL_JWT_KEY);
+
+        const user = await RegularUser.findById(decoded.userId);
 
         //2. Find the shoppingcart
+        let shoppingcart;
+        if (!user) {
+            shoppingcart = await ShoppingCart.findOne({cart_identifier: decoded.userId});
+        } else {
+            shoppingcart = await ShoppingCart.findOne({cart_identifier: jwt_token});
+        }
+        if (!shoppingcart) return deliveryTime_UTC;
 
-        //3. Calculate the arrival timestap
-        let DeliveryTimeEstimate = CurrentTimestamp;
+        //3. Calculate the arrival deliveryestimate
+
+        /*
+        The delivery estimate has the following components:
+        1. The time it takes the business to progesses the order:
+        2. The time it takes for the order to be shipped by the provider (e.g Omniva)
+         */
+
+        /*Add processing delay
+        1. Goods are processed M-F from 9am to 5PM.
+        2. It takes 5 minutes per good group. E.g it takes 5 minutes to procees 1 HP book and 5 minutes on procces 2 HP books
+        3. Each business works asyncronsoly from the other.
+        */
+
+        //Time till next workin day
+        const getTimeTillNextWorkDay = function (currentTime) {
+            let localTime = currentTime-TimezoneOffset_MS;
+            let currentTimeAsDate =  new Date(localTime);
+            // Is it after 5 PM (local time)
+            localTime += (currentTimeAsDate.getHours() >= 17) ? (24 -currentTimeAsDate.getHours())*ONE_HOUR_IN_MS+9*ONE_HOUR_IN_MS : 0;
+            currentTimeAsDate =  new Date(localTime);
+
+           //Is it the weekend? (local time) If so calculate time till Monday
+            if (currentTimeAsDate.getDay() === 6 || currentTimeAsDate.getDay() ===7) {
+                localTime += (currentTimeAsDate.getDay() === 6) ? 2*ONE_DAY_IN_MS+9*ONE_HOUR_IN_MS : ONE_DAY_IN_MS+9*ONE_HOUR_IN_MS;
+                return localTime+TimezoneOffset_MS-currentTime;
+            };
+            return localTime+TimezoneOffset_MS-currentTime;
+        };
+        deliveryTime_UTC += getTimeTillNextWorkDay(deliveryTime_UTC);
 
 
-
-        //Return the final value
-        return DeliveryTimeEstimate.toString();
+        return deliveryTime_UTC.toString();
     },
     addParcelDeliveryLocation: async ({provider, name, country, x_coordinate, y_coordinate}) => {
         const existingParcelDeliveryLocation = await ParcelDeliveryLocation.findOne({
@@ -764,171 +786,5 @@ module.exports = {
         const result = await new_ParcelDeliveryLocation.save();
         return {...result._doc};
     },
-};
-
-
-/*
-    DeliveryOptions: async args => {
-        //Input variables
-        const jwt_token = args.deliverycostInput.jwt_token;
-        const SHIPPING_Name = args.deliverycostInput.SHIPPING_Name;
-        const SHIPPING_ShippingAddressLine1 = args.deliverycostInput.SHIPPING_ShippingAddressLine1;
-        const SHIPPING_ShippingAddressLine2 = args.deliverycostInput.SHIPPING_ShippingAddressLine2;
-        const SHIPPING_ShippingCity = args.deliverycostInput.SHIPPING_ShippingCity;
-        const SHIPPING_ShippingRegion = args.deliverycostInput.SHIPPING_ShippingRegion;
-        const SHIPPING_ShippingZip = args.deliverycostInput.SHIPPING_ShippingZip;
-        const SHIPPING_ShippingCountry = args.deliverycostInput.SHIPPING_ShippingCountry;
-
-        //TODO get real UPS options
-
-
-        //1. Find the user
-        const user = await findUser(jwt_token);
-        //2. Find the shoppingcart
-        const shoppingcart = await ShoppingCart.findOne({cart_identifier: user._id});
-        if (!shoppingcart) {
-            throw new Error('Shoppingcart was not found');
-        }
-        //3. Calculate the Shipping cost
-        /*
-        Businesses do ot send packages directly to the customer. They first send it NoNoLine warehouse, then from there it is shipped to the customer.
-        //TODO: upgrade: different stripe account for every country we operate
-         */
-
-/*
-const findItems = async function (shoppingcart, user) {
-    let items = [];
-
-    for (let i = 0; i < shoppingcart.goods.length; i++) {
-        const cartgood = await CartGood.findById(shoppingcart.goods[i]);
-        const good = await Good.findById(cartgood.good);
-        const quantity = Math.max(Math.min(cartgood.quantity, good.quantity), 1);
-    }
-    return items;
-};
-//TODO: develop optimal parcel finder
-//TODO: use shippo
-
-
-const addressFrom  = {
-    "name": "NoNoLine Inc",
-    "street1": "Maakri 36",
-    "street2": "20",
-    "city": "Tallinn",
-    "zip": "10145",
-    "country": "EE"
-};
-
-
-let getStateTwoDigitCode = function (stateFullName) {
-    const stateList = {
-        'Arizona': 'AZ',
-        'Alabama': 'AL',
-        'Alaska': 'AK',
-        'Arkansas': 'AR',
-        'California': 'CA',
-        'Colorado': 'CO',
-        'Connecticut': 'CT',
-        'Delaware': 'DE',
-        'Florida': 'FL',
-        'Georgia': 'GA',
-        'Hawaii': 'HI',
-        'Idaho': 'ID',
-        'Illinois': 'IL',
-        'Indiana': 'IN',
-        'Iowa': 'IA',
-        'Kansas': 'KS',
-        'Kentucky': 'KY',
-        'Louisiana': 'LA',
-        'Maine': 'ME',
-        'Maryland': 'MD',
-        'Massachusetts': 'MA',
-        'Michigan': 'MI',
-        'Minnesota': 'MN',
-        'Mississippi': 'MS',
-        'Missouri': 'MO',
-        'Montana': 'MT',
-        'Nebraska': 'NE',
-        'Nevada': 'NV',
-        'New Hampshire': 'NH',
-        'New Jersey': 'NJ',
-        'New Mexico': 'NM',
-        'New York': 'NY',
-        'North Carolina': 'NC',
-        'North Dakota': 'ND',
-        'Ohio': 'OH',
-        'Oklahoma': 'OK',
-        'Oregon': 'OR',
-        'Pennsylvania': 'PA',
-        'Rhode Island': 'RI',
-        'South Carolina': 'SC',
-        'South Dakota': 'SD',
-        'Tennessee': 'TN',
-        'Texas': 'TX',
-        'Utah': 'UT',
-        'Vermont': 'VT',
-        'Virginia': 'VA',
-        'Washington': 'WA',
-        'West Virginia': 'WV',
-        'Wisconsin': 'WI',
-        'Wyoming': 'WY'
-    }
-    return stateList[stateFullName];
-};
-let addressTo = undefined;
-
-if (SHIPPING_ShippingCountry === "USA"){
-    addressTo = {
-        "email":user.email,
-        "name": SHIPPING_Name,
-        "street1": SHIPPING_ShippingAddressLine1,
-        "street2": SHIPPING_ShippingAddressLine2,
-        "city": SHIPPING_ShippingCity,
-        "state": getStateTwoDigitCode(SHIPPING_ShippingRegion),
-        "zip": SHIPPING_ShippingZip,
-        "country": getCode(SHIPPING_ShippingCountry)
-    };
 }
-else{
-    addressTo = {
-        "email":user.email,
-        "name": SHIPPING_Name,
-        "street1": SHIPPING_ShippingAddressLine1,
-        "street2": SHIPPING_ShippingAddressLine2,
-        "city": SHIPPING_ShippingCity,
-        "zip": SHIPPING_ShippingZip,
-        "country":getCode(SHIPPING_ShippingCountry)
-    };
-}
-let parcel = {
-    "length": "5",
-    "width": "5",
-    "height": "5",
-    "distance_unit": "in",
-    "weight": "2",
-    "mass_unit": "lb"
-};
-let parcel1 = {
-    "length": "5",
-    "width": "5",
-    "height": "5",
-    "distance_unit": "in",
-    "weight": "2",
-    "mass_unit": "lb"
-};
-
-
-shippo.shipment.create({
-    "address_from": addressFrom,
-    "address_to": addressTo,
-    "parcels": [parcel,parcel1],
-    "async": false
-}, function(err, shipment){
-    console.log(shipment)
-    //  console.log(err);
-});
-
-
-return true;
-},
- */
+;

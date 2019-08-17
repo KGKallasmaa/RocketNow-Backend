@@ -3,26 +3,55 @@ const Schema = mongoose.Schema;
 
 
 const OrderAddressSchema = new Schema({
-    shipping_name: {
+    shippingName: {
         type: String,
         required: true
     },
-    street_address: {
+    dateAdded_UTC: {
         type: String,
-        required: true
+        required:true,
+        default:new Date().getTime().toString()
     },
-    town: {
-        type: String,
-        required: true
+    isActive:{
+        type:Boolean,
+        required:true,
+        default: true
     },
-    postal_code: {
+    addressOne: {
         type: String,
-        required: true
+        required: false
+    },
+    addressTwo: {
+        type: String,
+        required: false
+    },
+    city: {
+        type: String,
+        required: false
+    },
+    region: {
+        type: String,
+        required: false
+    },
+    zip: {
+        type: String,
+        required: false
     },
     country: {
         type: String,
+        required: false
+    },
+    shippingMethod: {
+        type: String,
         required: true
-    }
+    },
+    parcelDeliveryLocation: {
+        type: Schema.Types.ObjectId,
+        ref: 'ParcelDeliveryLocation',
+        required: false
+    },
 });
 
-module.exports = mongoose.model('OrderAddress', OrderAddressSchema);
+module.exports = {
+    'OrderAddress': mongoose.model('OrderAddress', OrderAddressSchema),
+};

@@ -28,11 +28,38 @@ const cartSchema = new Schema({
     tax_cost: {
         type: Number,
         required: false
+    },
+    shippingAddress: [{
+        type: Schema.Types.ObjectId,
+        ref: 'OrderAddress'
+    }],
+    deliveryEstimate_UTC: {
+        type: String,
+        required: false
+    }
+});
+const forexSchema = new Schema({
+    source: {
+        type: String,
+        required: true
+    },
+    target: {
+        type: String,
+        required: true,
+        default:"EUR"
+    },
+    lastUpdateTime_UTC: {
+        type: String,
+        required: true,
+        default: new Date().getTime()
+    },
+    rate: {
+        type: Number,
+        required: true
     }
 });
 
-
 module.exports = {
     'ShoppingCart': mongoose.model('ShoppingCart', cartSchema),
+    'ForexRate': mongoose.model('ForexRate', forexSchema),
 };
-

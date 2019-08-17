@@ -104,6 +104,11 @@ const ordergoodSchema = new Schema({
         type: String,
         required: true
     },
+    dateCreated_UTC: {
+        type: String,
+        required: true,
+        default:new Date().getTime()
+    },
     price_per_one_item: {
         type: Number,
         required: true

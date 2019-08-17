@@ -58,7 +58,16 @@ const orderSchema = new Schema({
     order_items: [{
         type: Schema.Types.ObjectId,
         ref: 'OrderGood'
-    }]
+    }],
+    deliveryEstimate_UTC: {
+        type: String,
+        required: false
+    },
+    shippingAddress: {
+        type: Schema.Types.ObjectId,
+        ref: 'OrderAddress',
+        required: false
+    }
 });
 
 

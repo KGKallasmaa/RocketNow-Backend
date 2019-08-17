@@ -11,12 +11,9 @@ const cart_schemas = require('../../models/shoppingcart');
 const ShoppingCart = cart_schemas.ShoppingCart;
 
 const good_schemas = require('../../models/good');
-const Good = good_schemas.Good;
 const CartGood = good_schemas.CartGood;
 
 const shoppingcartResolver = require('./shoppingcart');
-const userResolver = require('./user');
-const {transformShoppingCart} = require('./merge');
 
 const nodemailer = require('nodemailer');
 const emailVerificationService = nodemailer.createTransport({
@@ -175,57 +172,42 @@ async function sendEmail(token, toEmail, userId, type) {
 //Helper function
 async function addGoodsFromPreLoginToMain(userId, pre_login_shoppingcartId) {
     const pre_login_shoppingcart = await ShoppingCart.findOne({"cart_identifier": pre_login_shoppingcartId});
-    let do_be_deleted_cartgoods_array = [];
+    let toBeDeletedIds = [];
 
     for (let i = 0; i < pre_login_shoppingcart.goods.length; i++) {
         const cartgood = await CartGood.findById(pre_login_shoppingcart.goods[i]);
-
-        const quantity = cartgood.quantity;
-        const good_id = cartgood.good;
-
-
-        //Using an exsisting method, defined in shoppingcart resolvers
-        const response = await shoppingcartResolver.addToCart({
+         shoppingcartResolver.addToCart({
             cart_identifier: userId,
-            good_id: good_id,
-            quantity: quantity
+            good_id: cartgood.good,
+            quantity: cartgood.quantity
         });
-        do_be_deleted_cartgoods_array.push(cartgood._id);
-    }
-    //Delete the old cartgoods
-    for (let i = 0; i < do_be_deleted_cartgoods_array.length; i++) {
-        await CartGood.remove(
-            {_id: do_be_deleted_cartgoods_array[i]}
-        );
+        toBeDeletedIds.push(cartgood._id);
     }
 
-    //Delete the old shoppingcart
-    await ShoppingCart.remove(
-        {_id: pre_login_shoppingcart._id}
-    );
-
-    const main_shoppingcart = await ShoppingCart.findOne({"cart_identifier": userId});
-
-    return main_shoppingcart;
+    CartGood.deleteMany({id: { $in: toBeDeletedIds}}, function(err) {});
+    ShoppingCart.findByIdAndDelete(pre_login_shoppingcart._id);
+    return await ShoppingCart.findOne({"cart_identifier": userId});
 }
 
 //Helper function
 async function UpdateShoppingCart(userId, old_cart_id) {
-    const pre_login_shoppingcart = await ShoppingCart.findOne({"cart_identifier": old_cart_id}).select('goods');
+    const pre_login_shoppingcart = await ShoppingCart.findOne({"cart_identifier": old_cart_id});
     const main_shoppingcart = await ShoppingCart.findOne({"cart_identifier": userId});
 
-    //1. Does the user have a pre_login_cart problem do worry about?
-    if (!pre_login_shoppingcart) {
-        //1.1 Does the user have a main shoppingcart?
-        if (main_shoppingcart) {
-            return main_shoppingcart;
-        }
-        //return true -> evrythings i ok with the user
-        return true;
+    const preLoginCartIsPresent = pre_login_shoppingcart !== null;
+    const mainShoppingCartIsPresent = main_shoppingcart !== null;
+    const preLoginCartHasGoods = (preLoginCartIsPresent) ? pre_login_shoppingcart.goods.length >0: false;
 
+
+    if (!preLoginCartIsPresent && !mainShoppingCartIsPresent){
+        return true;
     }
-    //2.Add goods from pre_login cart to the main shopping cart. Then delete the pre login shoppingcart. Using an existing method, defined in shoppingcart resolvers file, to do it more effectively.
-    return await addGoodsFromPreLoginToMain(userId, old_cart_id)
+    else if (!preLoginCartHasGoods && mainShoppingCartIsPresent){
+        return main_shoppingcart;
+    }
+    else if (preLoginCartHasGoods){
+        return await addGoodsFromPreLoginToMain(userId, old_cart_id);
+    }
 }
 
 module.exports = {
@@ -296,6 +278,7 @@ module.exports = {
         }
     },
     individualUser: async ({jwt_token}) => {
+
         const decoded = jwt.decode(jwt_token, process.env.PERSONAL_JWT_KEY);
         if (!decoded) {
             return Error('JWT was not decoded properly');
@@ -362,7 +345,7 @@ module.exports = {
         }
         if (user.signupMethod !== loginMethod) {
             const methodRenaiming = (user.signupMethod === "Regular") ? "email" : user.signupMethod;
-            return Error("You siggned up with " + user.signupMethod + ". Log in with " + methodRenaiming + ".")
+            return Error("You signed up with " + user.signupMethod + ". Log in with " + methodRenaiming + ".")
         }
         if (user.signupMethod === "Regular") {
             const pw_is_correct = await bcrypt.compare(password, user.password);
@@ -392,10 +375,13 @@ module.exports = {
 
 
         if (old_cart_id) {
-            //TODO: debug shoppingcart merges
+            //user had shoppingcart before
+            //user had goods in oled
             const result = await UpdateShoppingCart(user._id, old_cart_id);
-            console.error("Shopping cart was not properly created for user #", user._id);
-            if (!result) return Error("Existing shoppingcart could not be merged");
+            if (!result) {
+                console.error("Shopping cart was not properly created for user #", user._id);
+                return Error("Existing shoppingcart could not be merged");
+            }
         }
         const current_time = new Date().getTime();
         const expires_in = (user.signupMethod === "Facebook") ? 6042000 : 3600000; //expires in 100 minutes or 60 minutes

@@ -54,6 +54,7 @@ input BusinessUserInput {
 type GeneralCategory {
   _id: ID!
   name: String!
+  tax:Float!
 }
 """
 ##################### Goods #####################
@@ -68,6 +69,7 @@ type CartGood {
 type OrderGood {
   _id: ID!
   title: String!
+  dateCreated_UTC:String!
   price_per_one_item: Float!
   main_image_cloudinary_secure_url: String!
   quantity: Int!
@@ -126,16 +128,6 @@ input goodInput {
   custom_attribute_5_value:String,
 }
 """
-##################### Rating #####################
-"""
-type Rating {
-  _id: ID!
-  value: Int!
-  rater: User!
-  comment:String
-  good :Good!
-}
-"""
 ##################### ShoppingCart #####################
 """
 type ShoppingCart {
@@ -146,6 +138,16 @@ type ShoppingCart {
   stripe_charged_total: Float
   shipping_cost:Float
   tax_cost:Float
+  shippingAddress:OrderAddress
+  deliveryEstimate_UTC:String
+}
+
+type ForexRate {
+  _id: ID!
+  source:String!
+  target:String!
+  rate:Float!
+  lastUpdateTime_UTC:String!
 }
 """
 ##################### Shipping #####################
@@ -184,6 +186,9 @@ type Order {
   shipping_cost:Float!
   tax_cost:Float!
   order_items: [OrderGood!]!
+  deliveryEstimate_UTC:String!
+  shippingAddress:OrderAddress!
+
 }
 type PartialOrder {
     _id: ID!
@@ -223,7 +228,27 @@ input OrderInput {
    ShippingCountry:String,
    ShippingMethod:String!,
    ShippingCost:Float,
-   ShippingCurrency:String!
+   taxCost:Float,
+   ShippingCurrency:String!,
+   deliveryEstimate_UTC:String,
+   totalCost:Float
+}
+"""
+##################### Address #####################
+"""
+type OrderAddress {
+  _id: ID!
+  dateAdded_UTC:String!
+  isActive:Boolean!
+  shippingName:String!
+  addressOne:String
+  addressTwo:String
+  city:String
+  region:String
+  zip:String
+  country:String
+  shippingMethod:String!
+  parcelDeliveryLocation:ParcelDeliveryLocation
 }
 """
 ##################### Search #####################
@@ -251,12 +276,13 @@ type RootQuery {
     login(email: String!, password: String!,old_cart_id:String,image_URL:String,loginMethod:String!,fullname:String): AuthData!    
  
     individualUser(jwt_token: String!): User!
+    individualOrder(jwt_token: String!,order_id:String): [Order!]
     individualGood(nr:Int!,jwt_token:String):Good!
     allGeneralCategories:[GeneralCategory!]!
     getAllMyListedGoods(jwt_token:String!): [Good!]
-    individualCart(jwt_token: String!): ShoppingCart!
+    individualCart(jwt_token: String!): ShoppingCart
     ParcelDeliveryLocations(UserLatCoordinate: Float!,UserLonCoordinate: Float!):[ParcelDeliveryLocation!]
-    numberOfGoodsInCartAndSubtotal(jwt_token: String!):[Float!]!
+    numberOfGoodsInCartAndSubtotalAndTax(jwt_token: String!):[Float!]!
     
     orderGoods(orderInput: finalOrderInput!):Order!
     DeliveryCost(deliverycostInput:OrderInput):Float!
@@ -272,7 +298,7 @@ type RootMutation {
     resetPassword(email:String,password:String,mode:String!,token:String):Boolean!
     
     addParcelDeliveryLocation(provider:String!,name:String!,country:String!,x_coordinate:Float!,y_coordinate:Float!):ParcelDeliveryLocation!
-    createGeneralCategory(name: String!):GeneralCategory!
+    createGeneralCategory(name: String!,tax:Float!):GeneralCategory!
     
     addPhysicalGood(goodInput: goodInput): Good!
     addToCart(cart_identifier: String!,good_id: ID!,quantity:Int!): ShoppingCart!
