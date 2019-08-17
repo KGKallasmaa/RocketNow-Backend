@@ -8,18 +8,25 @@ const user_schemas = require('../../models/user');
 const RegularUser = user_schemas.RegularUser;
 const BusinessUser = user_schemas.BusinessUser;
 
+const category_schemas = require('../../models/category');
+const GeneralCategory = category_schemas.GeneralCategory;
+
 const cart_schemas = require('../../models/shoppingcart');
 const ShoppingCart = cart_schemas.ShoppingCart;
+const ForexRate = cart_schemas.ForexRate;
 
 const shipping_schema = require('../../models/shipping');
 const ParcelDeliveryLocation = shipping_schema.ParcelDeliveryLocation;
+
+const address_schema = require('../../models/address');
+const OrderAddress = address_schema.OrderAddress;
 
 const good_schemas = require('../../models/good');
 const Good = good_schemas.Good;
 const CartGood = good_schemas.CartGood;
 const OrderGood = good_schemas.OrderGood;
-const axios = require('axios');
 
+const axios = require('axios');
 const {transformOrder} = require('./merge');
 
 
@@ -121,69 +128,48 @@ async function groupCartGoodsByBusinessAndUpdateBookedQuantity(shoppingcart) {
     return BusinessUser_Cartgoods;
 }
 
-//TODO: design a permanent solution
-const FIXER_MaxMonthlyQuery_COUNT = 1000;
-const ONE_MONTH_IN_MS = 2592000000;
-const QUERY_UPTATE_INTERVAl_MS = ONE_MONTH_IN_MS / FIXER_MaxMonthlyQuery_COUNT;
-let NextAvailableQueryTimestamp = undefined;
-let usd_eur = undefined;
-let gbp_eur = undefined;
-let rub_eur = undefined;
 
-async function uptadedForexRates() {
-    const KEY = process.env.FIXER_IO_API_KEY;
-    const URL = "http://data.fixer.io/api/latest?access_key=" + KEY + "&base=EUR&symbols = USD,RUB,GBP";
-    let return_value = false;
-    await axios.get(URL)
-        .then(response => {
-            if (response.data.success === true) {
-                usd_eur = response.data.rates.USD;
-                gbp_eur = response.data.rates.GBP;
-                rub_eur = response.data.rates.RUB;
-                return_value = true;
-            }
-        })
-        .catch(error => {
-            console.log("Error accessing Forex data " + error)
-        });
-    return return_value;
-}
-
-async function convertToStipeEUR(timestamp,
-                                 currency,
-                                 price) {
-    //Currently we support USD,RUB;EUR,GBP
-    if (!NextAvailableQueryTimestamp || !usd_eur || !gbp_eur || !rub_eur) {
-        NextAvailableQueryTimestamp = timestamp;
-    }
-    if (NextAvailableQueryTimestamp <= timestamp) {
-        const response = await uptadedForexRates();
-        if (response !== true) {
-            throw new Error("Error updating Forex rates")
+async function getForexData(sourceCurrency) {
+    const KEY = sourceCurrency + "_EUR";
+    const URL = "https://free.currconv.com/api/v7/convert?q=" + KEY + "&compact=ultra&apiKey=" + process.env.FREE_FOREX_API_KEY;
+    return await axios.get(URL).then(response => {
+            console.log("Forex rate for " + sourceCurrency + "/EUR was updated ");
+            return response.data[KEY];
         }
-        NextAvailableQueryTimestamp += QUERY_UPTATE_INTERVAl_MS;
-    }
-
-    let ReformattedPrice = 0;
-
-    switch (currency) {
-        case "EUR":
-            ReformattedPrice = price;
-            break;
-        case "USD":
-            ReformattedPrice = price * usd_eur;
-            break;
-        case "GBP":
-            ReformattedPrice = price * gbp_eur;
-            break;
-        case "RUB":
-            ReformattedPrice = price * rub_eur;
-            break;
-        default:
-            throw new Error("We're unable to convert currency %s", (currency))
-    }
-    return Math.ceil(100 * ReformattedPrice);
+    ).catch(error => {
+        return Error("Error accessing Forex data " + error)
+    });
 }
+
+async function convertToStipeEUR(currency, price) {
+    if (currency === "EUR") return Math.floor(Math.round(100 * price));
+    /*
+    Forex rates are provided by FreeForexApi. In an hour we can make 100 requests. Currently we support EUR,USD,RUB and GBP. Forex rates are updated at maximum every 1.8 minutes ( 60/ (100/3))
+     */
+    const currentRate = await ForexRate.findOne({source: currency, target: "EUR"});
+    if (!currentRate) {
+        const newForex = new ForexRate({
+            source: currency,
+            rate: Number(await getForexData(currency))
+        });
+        const result = await newForex.save();
+        return Math.ceil(100 * result.rate * price);
+    }
+    const oldestAcceptableUpdateTime = new Date(Date.now() - 108000);//1.8 minutes
+    if (parseInt(currentRate.lastUpdateTime_UTC) < oldestAcceptableUpdateTime) {
+        await ForexRate.update(
+            {_id: currentRate._id},
+            {
+                $set: {
+                    "rate": await getForexData(currency),
+                    "lastUpdateTime_UTC": new Date().getTime()
+                }
+            }
+        );
+    }
+    return Math.floor(Math.round(100 * (currentRate.rate * price)));
+}
+
 
 async function FormatShippingItem(
     ParcelDeliveryLocationId,
@@ -204,12 +190,9 @@ async function FormatShippingItem(
 
     switch (ShippingMethod) {
         case ("AddressDelivery"):
-            image = "https://res.cloudinary.com/dl7zea2jd/image/upload/v1561837922/shipping_pictures/AddressDeliveryLogo_hgnqht.png";
+            image = "https://res.cloudinary.com/dl7zea2jd/image/upload/v1565514682/shipping_pictures/AddressDeliveryLogo_lpqgpp.png";
             const name = ShippingName + " \n";
-            const address = ShippingAddressLine1 + (ShippingAddressLine2 !== undefined) ? "-" + ShippingAddressLine2 : "" + " \n";
-            const region = ShippingZip + ", " + ShippingCity + ", " + ShippingRegion + " \n";
-            const country = ShippingCountry + " \n";
-            description = name + address + region + country;
+            description ="Address delivery to "+ name;
             break;
         case ("ParcelDelivery"):
             const ShippingProvider = await ParcelDeliveryLocation.findById(ParcelDeliveryLocationId);
@@ -234,7 +217,7 @@ async function FormatShippingItem(
     item["name"] = (ShippingCost === 0) ? "Free shipping" : "Shipping";
     item["images"] = [image];
     item["description"] = description;
-    item["amount"] = await convertToStipeEUR(new Date().getTime(), ShippingCostCurrency, ShippingCost, 1);
+    item["amount"] = await convertToStipeEUR(ShippingCostCurrency, ShippingCost);
     item["currency"] = 'eur';
     item["quantity"] = 1;
     return item;
@@ -243,16 +226,16 @@ async function FormatShippingItem(
 async function GetStripeFormatedItems(shoppingcart,
                                       shippingItem) {
     let return_array = Array();
-    const CurrentTimestamp = new Date().getTime();
     //1. Format ShoppingCart items
     for (let i = 0; i < shoppingcart.goods.length; i++) {
         const cartgood = await CartGood.findById(shoppingcart.goods[i]);
         const good = await Good.findById(cartgood.good);
+        const category = await GeneralCategory.findById(good.general_category);
         const quantity = Math.max(Math.min(cartgood.quantity, good.quantity), 1);
         let item = {};
         item["name"] = good.title;
         item["images"] = [good.main_image_cloudinary_secure_url];
-        item["amount"] = await convertToStipeEUR(CurrentTimestamp, good.currency, good.current_price);
+        item["amount"] = await convertToStipeEUR(good.currency, good.current_price * (1 + category.tax));
         item["currency"] = 'eur';
         item["quantity"] = quantity;
         return_array.push(item);
@@ -281,6 +264,7 @@ async function getPartialOrders(BusinessUser_Cartgoods,
 
             let new_OrderGood = await OrderGood.findOne({
                 "title": good.title,
+                "dateCreated_UTC":current_timestamp,
                 "price_per_one_item": cartgood.price_per_one_item,
                 "main_image_cloudinary_secure_url": good.main_image_cloudinary_secure_url,
                 "quantity": cartgood.quantity,
@@ -289,6 +273,7 @@ async function getPartialOrders(BusinessUser_Cartgoods,
             if (!new_OrderGood) {
                 new_OrderGood = new OrderGood({
                     title: good.title,
+                    dateCreated_UTC:current_timestamp,
                     price_per_one_item: cartgood.price_per_one_item,
                     main_image_cloudinary_secure_url: good.main_image_cloudinary_secure_url,
                     quantity: cartgood.quantity,
@@ -325,7 +310,6 @@ async function getOrderItemsFromPartialOrders(PartialOrders) {
         const SinglePartialOrder = PartialOrders[index];
         order_items.push(...SinglePartialOrder.order_items);
     }
-    console.log(order_items);
     return order_items;
 }
 
@@ -343,7 +327,10 @@ module.exports = {
         const ShippingCountry = args.checkoutInput.ShippingCountry;
         const ShippingMethod = args.checkoutInput.ShippingMethod;
         const ShippingCost = args.checkoutInput.ShippingCost;
+        const totalCost = args.checkoutInput.totalCost;
+        const taxCost = args.checkoutInput.taxCost;
         const ShippingCostCurrency = args.checkoutInput.ShippingCurrency;
+        const deliveryEstimate_UTC = args.checkoutInput.deliveryEstimate_UTC;
 
 
         //1. Find the corresponding user
@@ -371,33 +358,68 @@ module.exports = {
         //TODO: add suport. gerate unique Ids till ou have a cone that doest overlap
         const UNICUE_ORDER_ID = shoppingcart.success_id;
 
-        //5. Update shopping cart: Add the stripe_charged_total; shipping_cost and tax_cost atributes
-        const stripe_charged_total = async function (shoppingcart, shippingcost) {
-            let total = 0;
-            for (let i = 0; i < shoppingcart.goods.length; i++) {
-                const cartgood = await CartGood.findById(shoppingcart.goods[i]);
-                const good = await Good.findById(cartgood.good);
-                const quantity = Math.max(Math.min(cartgood.quantity, good.quantity), 1);
-                console.log("Testing: quantitity " + quantity)
-                console.log("Price: " + good.current_price);
-                total += quantity * good.current_price;
+        let userAddress;
+
+        if (ShippingMethod === "ParcelDelivery") {
+            userAddress = await OrderAddress.findOne({
+                parcelDeliveryLocation: ParcelDeliveryLocation,
+                shippingName: ShippingName,
+                shippingMethod: ShippingMethod,
+            });
+            if (!userAddress) {
+                userAddress = new OrderAddress({
+                    shippingName: ShippingName,
+                    parcelDeliveryLocation: ParcelDeliveryLocation,
+                    shippingMethod: ShippingMethod,
+                });
+                await userAddress.save();
+                console.log("Saved a new shipping address for user #" + regular_user._id)
             }
-            return total + shippingcost;
-        };
-        //TODO: tax calculation
+        } else if (ShippingMethod === "AddressDelivery") {
+            userAddress = await OrderAddress.findOne({
+                shippingMethod: ShippingMethod,
+                shippingName: ShippingName,
+                addressOne: ShippingAddressLine1,
+                addressTwo: ShippingAddressLine2,
+                city: ShippingCity,
+                region: ShippingRegion,
+                zip: ShippingZip,
+                country: ShippingCountry,
+            });
+            if (!userAddress) {
+                userAddress = new OrderAddress({
+                    shippingMethod: ShippingMethod,
+                    shippingName: ShippingName,
+                    addressOne: ShippingAddressLine1,
+                    addressTwo: ShippingAddressLine2,
+                    city: ShippingCity,
+                    region: ShippingRegion,
+                    zip: ShippingZip,
+                    country: ShippingCountry,
+                });
+                await userAddress.save();
+                console.log("Saved a new shipping address for user #" + regular_user._id)
+            }
+        } else {
+            return Error("Shippingmethod " + ShippingMethod.toLowerCase() + " is not supported");
+        }
+
         await ShoppingCart.update(
             {_id: shoppingcart._id},
             {
                 $set: {
-                    "stripe_charged_total": await stripe_charged_total(shoppingcart, ShippingCost),
+                    "stripe_charged_total": totalCost,
                     "shipping_cost": ShippingCost,
-                    "tax_cost": 0,
+                    "tax_cost": taxCost,
+                    "shippingAddress": userAddress,
+                    "deliveryEstimate_UTC": deliveryEstimate_UTC
                 }
             }
         );
 
         const SuccessUrl = process.env.CLIENT_URL + "/success/" + UNICUE_ORDER_ID;
         const CancelUrl = process.env.CLIENT_URL + "/cancel/" + UNICUE_ORDER_ID;
+
 
         const session = await stripe.checkout.sessions.create({
             customer_email: regular_user.email,
@@ -409,7 +431,8 @@ module.exports = {
             success_url: SuccessUrl,
             cancel_url: CancelUrl,
         });
-        //Save nessesry session details
+        console.log("User # " + regular_user._id + " entered checkout ");
+
         return {sessionId: session.id};
     },
     orderGoods: async args => {
@@ -444,6 +467,7 @@ module.exports = {
             order_shipping_cost,
             order_total,
             order_tax_cost);
+
         //3. Create the Order (for the customer)
         const new_Order = new Order({
             received_timestamp_UTC: current_timestamp,
@@ -454,7 +478,9 @@ module.exports = {
             subtotal: order_subtotal,
             shipping_cost: order_shipping_cost,
             tax_cost: order_tax_cost,
-            order_items: await getOrderItemsFromPartialOrders(Partial_Orders)
+            order_items: await getOrderItemsFromPartialOrders(Partial_Orders),
+            deliveryEstimate_UTC: shoppingcart.deliveryEstimate_UTC,
+            shippingAddress: shoppingcart.shippingAddress
         });
         await new_Order.save();
 
@@ -467,8 +493,40 @@ module.exports = {
         // 5. Delete the current shopping cart
         await ShoppingCart.findByIdAndDelete(shoppingcart._id);
 
+        //6. Update user status to customer
+        if (customer.isCustomer === false) {
+            await RegularUser.update(
+                {_id: customer._id},
+                {
+                    $set: {
+                        "isCustomer": true,
+                    }
+                }
+            );
+        }
+
+
         //Finally return the shopping cart
+        console.log("User # " + customer._id + " submitted an order # " + new_Order._id);
+
         return transformOrder(new_Order);
+    },
+    individualOrder: async ({jwt_token,order_id}) => {
+        const decoded = jwt.decode(jwt_token, process.env.PERSONAL_JWT_KEY);
+        if (!decoded) return Error('JWT was not decoded properly');
+
+        const user = await RegularUser.findById(decoded.userId);
+        if (!user) return Error('User does not exist');
+        let orders;
+        if (order_id){
+            orders = await Order.find({_id:order_id});
+        }
+        else {
+            orders = await Order.find({customer: user._id}).sort([['received_timestamp_UTC', 'descending']]);
+        }
+
+        return orders.map(order => {
+            return transformOrder(order);
+        });
     }
-}
-;
+};

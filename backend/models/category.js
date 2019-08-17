@@ -8,6 +8,10 @@ const generalcategorySchema = new Schema({
         type: String,
         required: true,
         unique: true
+    },
+    tax: {
+        type: Number,
+        required: true,
     }
 });
 

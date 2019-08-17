@@ -7,15 +7,16 @@ const {transformGeneralCategory, transformSubCategory} = require('./merge');
 
 
 module.exports = {
-    createGeneralCategory: async ({name}) => {
+    createGeneralCategory: async ({name,tax}) => {
         try {
             const existingCategory = await GeneralCategory.findOne({name: name});
             if (existingCategory) {
-                throw new Error('This general category already exists.');
+                return new Error('This general category already exists.');
             }
 
             const category = new GeneralCategory({
                 name: name,
+                tax:tax
             });
 
             const result = await category.save();
