@@ -199,7 +199,6 @@ module.exports = {
             return Error("Good was not found");
         }
         //TODO: integrate reccomendations
-        console.log("good #"+good._id+" was just viewed.");
         return transformGood(good);
     }
 };

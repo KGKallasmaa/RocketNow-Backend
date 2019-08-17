@@ -1,5 +1,7 @@
 const user_schemas = require('../../models/user');
 const good_schemas = require('../../models/good');
+const address_schemas = require('../../models/address');
+const shipping_schemas = require('../../models/shipping');
 
 const category_schemas = require('../../models/category');
 const GeneralCategory = category_schemas.GeneralCategory;
@@ -58,51 +60,76 @@ const transformGeneralCategory = category => {
 /*
 Order
 */
-const transformOrder = order => {
-    try {
+const transformOrder = async order => {
+    return {
+        ...order._doc,
+        _id: order._id,
+        customer: user.bind(this, order.customer._id),
+        fulfillers: transformOrderBusinessUsers.bind(this, order.fulfillers),
+        partial_orders: transformPartialOrders.bind(this, order.partial_orders),
+        order_items: order_items.bind(this, order.order_items),
+        shippingAddress: transformShippingAddress.bind(this, order.shippingAddress)
+    };
+};
+const transformShippingAddress = async shippingAddressID => {
+    const address = await address_schemas.OrderAddress.findById(shippingAddressID);
+    if (address.shippingMethod ==='AddressDelivery') {
         return {
-            ...order._doc,
-            fulfillers: transformOrderBusinessUsers.bind(this, order.fulfillers),
-            _id:order.id,
-            order_items: order_items.bind(this, order.order_items)
+            ...address._doc,
+            parcelDeliveryLocation: null,
+            _id: address.id,
         };
-    } catch (error) {
-        throw error
     }
+    return {
+        ...address._doc,
+        parcelDeliveryLocation: transformPartialDeliveryLocation.bind(this, address.parcelDeliveryLocation),
+        _id: address.id,
+    };
+};
+const transformPartialDeliveryLocation = async parcelDeliveryLocationID => {
+    const parcelDeliveryLocation = await shipping_schemas.ParcelDeliveryLocation.findById(parcelDeliveryLocationID);
+    return {
+        ...parcelDeliveryLocation._doc,
+        _id: parcelDeliveryLocation.id,
+    };
+};
+
+const transformPartialOrders = async partialOrders => {
+    return partialOrders.map(partialOrder => {
+        return transformPartialOrder(partialOrder);
+    });
 }
+const transformPartialOrder = async partialOrder => {
+    return {
+        ...partialOrder._doc,
+        _id: partialOrder.id,
+    };
+};
+
 const order_items = async orderItems => {
+    return orderItems.map(good => {
+        return transformOrderGood(good);
+    });
+};
+const transformOrderGood = async ordergoodID => {
+    const ordergood = await good_schemas.OrderGood.findById(ordergoodID);
+    return {
+        ...ordergood._doc,
+        _id: ordergood.id,
+    };
+};
+
+const transformOrderBusinessUsers = async sellers => {
     try {
-        if (orderItems.length === 0) {
-            throw new Error ("Order can't be empty")
+        if (sellers.length === 0) {
+            throw new Error("Every order needs a business user")
         }
-        return orderItems.map(ordergood => {
-            return transformOrderGood(ordergood);
+        return sellers.map(seller => {
+            return businessuser(seller)
         });
     } catch (err) {
         throw err;
     }
-};
-const transformOrderGood = async ordergood => {
-    try {
-         return {
-             ...ordergood._doc,
-             _id:ordergood.id,
-         };
-    } catch (error) {
-        throw new error
-    }
-}
-const transformOrderBusinessUsers = async sellers => {
-try {
-    if (sellers.length === 0) {
-        throw new Error("Every order needs a business user")
-    }
-    return sellers.map(seller => {
-        return businessuser(seller)
-    });
-} catch (err) {
-    throw err;
-}
 }
 
 /*
