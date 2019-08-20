@@ -1,9 +1,9 @@
 require('dotenv').config();
 
-let category_schemas = require('./models/category');
-let GeneralCategory = category_schemas.GeneralCategory;
+const category_schemas = require('../models/generalCategory');
+const GeneralCategory = category_schemas.GeneralCategory;
 
-const {transformGeneralCategory, transformSubCategory} = require('../enchancer');
+const {transformGeneralCategory} = require('../../enchancer');
 
 
 module.exports = {
@@ -28,9 +28,9 @@ module.exports = {
     },
     allGeneralCategories: async () => {
         try {
-            let allgeneralcategoeis = await GeneralCategory.find().sort({'name': 1});
+            const allgeneralcategoeis = await GeneralCategory.find().sort({'name': 1});
             if (!allgeneralcategoeis) {
-                throw new Error('No general categories found.');
+                return  new Error('No general categories found.');
             }
 
             return allgeneralcategoeis.map(category => {

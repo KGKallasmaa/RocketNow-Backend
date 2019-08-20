@@ -6,7 +6,7 @@ const good_schemas = require('../good/models/good');
 const Good = good_schemas.Good;
 const CartGood = good_schemas.CartGood;
 
-const category_schemas = require('../category/models/category');
+const category_schemas = require('../category/models/generalCategory');
 const GeneralCategory = category_schemas.GeneralCategory;
 
 const cart_schemas = require('./models/shoppingcart');

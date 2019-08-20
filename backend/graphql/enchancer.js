@@ -3,7 +3,7 @@ const good_schemas = require('./good/models/good');
 const address_schemas = require('./shipping/models/address');
 const shipping_schemas = require('./shipping/models/shipping');
 
-const category_schemas = require('./category/models/category');
+const category_schemas = require('./category/models/generalCategory');
 const GeneralCategory = category_schemas.GeneralCategory;
 
 

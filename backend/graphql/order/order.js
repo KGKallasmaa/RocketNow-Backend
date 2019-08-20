@@ -8,7 +8,7 @@ const user_schemas = require('../user/models/user');
 const RegularUser = user_schemas.RegularUser;
 const BusinessUser = user_schemas.BusinessUser;
 
-const category_schemas = require('../category/models/category');
+const category_schemas = require('../category/models/generalCategory');
 const GeneralCategory = category_schemas.GeneralCategory;
 
 const cart_schemas = require('../shoppingcart/models/shoppingcart');
