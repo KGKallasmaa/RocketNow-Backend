@@ -37,7 +37,6 @@
     "multer": "^1.4.1",
     "multer-storage-cloudinary": "^2.2.1",
     "nodemailer": "^6.3.0",
-    "nodemon": "^1.19.1",
     "stopword": "^0.2.4",
     "stripe": "^7.1.0",
     "graphql": "^14.0.0",
