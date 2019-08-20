@@ -25,6 +25,8 @@ type BusinessUser {
   _id: ID!
   nr:Int!
   businessname: String!
+  logoURL:String!
+  description:String!
   email: String!
   password: String!
 }
@@ -276,8 +278,10 @@ type RootQuery {
     login(email: String!, password: String!,old_cart_id:String,image_URL:String,loginMethod:String!,fullname:String): AuthData!    
  
     individualUser(jwt_token: String!): User!
+    individualBusinessUser(nr:Int!,businessname:String): BusinessUser!
     individualOrder(jwt_token: String!,order_id:String): [Order!]
     individualGood(nr:Int!,jwt_token:String):Good!
+    businessUserGoods(nr:Int!,businessname:String): [Good!]
     allGeneralCategories:[GeneralCategory!]!
     getAllMyListedGoods(jwt_token:String!): [Good!]
     individualCart(jwt_token: String!): ShoppingCart

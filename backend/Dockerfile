@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:latest-alpine
 
 MAINTAINER karl.gustav1789@gmail.com
 

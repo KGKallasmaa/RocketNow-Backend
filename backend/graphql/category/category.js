@@ -1,9 +1,9 @@
 require('dotenv').config();
 
-let category_schemas = require('../../models/category');
+let category_schemas = require('./models/category');
 let GeneralCategory = category_schemas.GeneralCategory;
 
-const {transformGeneralCategory, transformSubCategory} = require('./merge');
+const {transformGeneralCategory, transformSubCategory} = require('../enchancer');
 
 
 module.exports = {
@@ -35,21 +35,6 @@ module.exports = {
 
             return allgeneralcategoeis.map(category => {
                 return transformGeneralCategory(category);
-            });
-
-        } catch (error) {
-            throw error
-        }
-    },
-    allSubCategories: async () => {
-        try {
-            let allsubcategories = await SubCategory.find().sort({'name': 1});
-            if (!allsubcategories) {
-                throw new Error('No sub categories found.');
-            }
-
-            return allsubcategories.map(category => {
-                return transformSubCategory(category);
             });
 
         } catch (error) {

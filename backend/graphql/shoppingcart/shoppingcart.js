@@ -1,20 +1,20 @@
 require('dotenv').config();
 
-const {transformShoppingCart} = require('./merge');
+const {transformShoppingCart} = require('../enchancer');
 
-const good_schemas = require('../../models/good');
+const good_schemas = require('../good/models/good');
 const Good = good_schemas.Good;
 const CartGood = good_schemas.CartGood;
 
-const category_schemas = require('../../models/category');
+const category_schemas = require('../category/models/category');
 const GeneralCategory = category_schemas.GeneralCategory;
 
-const cart_schemas = require('../../models/shoppingcart');
+const cart_schemas = require('./models/shoppingcart');
 const ShoppingCart = cart_schemas.ShoppingCart;
 const ForexRate = cart_schemas.ForexRate;
 
 
-const user_schemas = require('../../models/user');
+const user_schemas = require('../user/models/user');
 const RegularUser = user_schemas.RegularUser;
 
 

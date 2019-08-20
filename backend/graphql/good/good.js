@@ -1,18 +1,18 @@
 require('dotenv').config();
 
-const {transformGood} = require('./merge');
+const {transformGood} = require('../enchancer');
 
-const good_schemas = require('../../models/good');
+const good_schemas = require('./models/good');
 const Good = good_schemas.Good;
 
-const user_schemas = require('../../models/user');
+const user_schemas = require('../user/models/user');
 const BusinessUser = user_schemas.BusinessUser;
 const RegularUser = user_schemas.RegularUser;
 
-const category_schemas = require('../../models/category');
+const category_schemas = require('../category/models/category');
 const GeneralCategory = category_schemas.GeneralCategory;
 
-const index_schema = require('../../models/index');
+const index_schema = require('../search/models');
 const Index = index_schema.Index;
 
 const jwt = require('jsonwebtoken');
@@ -21,10 +21,8 @@ const stopwords = require('stopword');
 
 const stripe = require('stripe')(process.env.STRIPE_API_SECRET);
 
-const recombee = require('recombee-api-client');
-const rqs = recombee.requests;
 
-const client = new recombee.ApiClient((process.env.NODE_MODE === "Production") ? process.env.RECCOMENATION_PROD_DB : process.env.RECCOMENATION_DEV_DB, (process.env.NODE_MODE === "Production") ? process.env.RECCOMENDATION_PROD_PRIVATE_TOKEN : process.env.RECCOMENDATION_DEV_PRIVATE_TOKEN);
+
 
 
 function get_keywords(title, description, general_category_name, seller_name) {
@@ -200,5 +198,16 @@ module.exports = {
         }
         //TODO: integrate reccomendations
         return transformGood(good);
+    },
+    businessUserGoods: async ({nr,businessname}) => {
+        const user = await BusinessUser.findOne({nr:nr,businessname:businessname});
+        if (!user) {
+            return Error('This business does not exist');
+        }
+        const goods= await Good.find({seller:user});
+
+        return goods.map(good => {
+            return transformGood(good);
+        });
     }
 };

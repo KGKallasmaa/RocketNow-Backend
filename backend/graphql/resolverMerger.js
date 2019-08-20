@@ -1,0 +1,22 @@
+const userResolver = require('./user/user');
+const goodResolver = require('./good/good');
+const searchResolver = require('./search/search');
+const shoppingcartResolver = require('./shoppingcart/shoppingcart');
+const categoryResolver = require('./category/category');
+const warehouseResolver = require('./warehouse/warehouse');
+const orderResolver = require('./order/order');
+const shippingResolver = require('./shipping/shipping');
+
+
+const rootResolver = {
+  ...userResolver,
+  ...goodResolver,
+  ...shoppingcartResolver,
+  ...categoryResolver,
+  ...searchResolver,
+  ...warehouseResolver,
+  ...orderResolver,
+  ...shippingResolver
+};
+
+module.exports = rootResolver;

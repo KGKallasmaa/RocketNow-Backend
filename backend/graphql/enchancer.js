@@ -1,9 +1,9 @@
-const user_schemas = require('../../models/user');
-const good_schemas = require('../../models/good');
-const address_schemas = require('../../models/address');
-const shipping_schemas = require('../../models/shipping');
+const user_schemas = require('./user/models/user');
+const good_schemas = require('./good/models/good');
+const address_schemas = require('./shipping/models/address');
+const shipping_schemas = require('./shipping/models/shipping');
 
-const category_schemas = require('../../models/category');
+const category_schemas = require('./category/models/category');
 const GeneralCategory = category_schemas.GeneralCategory;
 
 

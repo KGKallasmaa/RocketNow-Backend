@@ -1,11 +1,11 @@
 require('dotenv').config();
 
-const {transformGood} = require('./merge');
+const {transformGood} = require('../enchancer');
 
-const good_schemas = require('../../models/good');
+const good_schemas = require('../good/models/good');
 const Good = good_schemas.Good;
 
-const index_schema = require('../../models/index');
+const index_schema = require('./models');
 const Index = index_schema.Index;
 
 const stopwords = require('stopword');

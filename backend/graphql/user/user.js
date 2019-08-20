@@ -3,17 +3,17 @@ require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const user_schemas = require('../../models/user');
+const user_schemas = require('./models/user');
 const BusinessUser = user_schemas.BusinessUser;
 const RegularUser = user_schemas.RegularUser;
 
-const cart_schemas = require('../../models/shoppingcart');
+const cart_schemas = require('../shoppingcart/models/shoppingcart');
 const ShoppingCart = cart_schemas.ShoppingCart;
 
-const good_schemas = require('../../models/good');
+const good_schemas = require('../good/models/good');
 const CartGood = good_schemas.CartGood;
 
-const shoppingcartResolver = require('./shoppingcart');
+const shoppingcartResolver = require('../shoppingcart/shoppingcart');
 
 const nodemailer = require('nodemailer');
 const emailVerificationService = nodemailer.createTransport({
@@ -290,6 +290,14 @@ module.exports = {
         }
         return {...user._doc, password: null, _id: user.id};
     },
+    individualBusinessUser: async ({nr,businessname}) => {
+        const user = await BusinessUser.findOne({nr:nr,businessname:businessname});
+        if (!user) {
+            return Error('This business does not exist');
+        }
+        return {...user._doc, password: null, _id: user.id};
+    },
+
     login: async ({email, password, old_cart_id, image_URL, loginMethod, fullname}) => {
         let user = await RegularUser.findOne({email: email});
 

@@ -6,8 +6,6 @@ const mongoose = require('mongoose');
 let cors = require('cors');
 const ip = require("ip");
 
-
-
 //Image upload
 const multer = require("multer");
 const cloudinary = require("cloudinary");
@@ -28,11 +26,10 @@ const storage = cloudinaryStorage({
 const parser = multer({storage: storage});
 
 
-const graphQlSchema = require('./graphql/schema/index');
-const graphQlResolvers = require('./graphql/resolvers/index');
+const graphQlSchema = require('./graphql/schema');
+const graphQlResolvers = require('./graphql/resolverMerger');
 
 
-//TODO: add process.env support
 let app = express();
 app.use(cors());
 app.use(bodyParser.json());
@@ -58,25 +55,26 @@ app.use(function (err, req, res, next) {
     console.log('Error: ' + err);
     next(err)
 });
+connectToDatabase()
 
-console.log("testing mongodb user"+process.env.MONGO_USER);
+function connectToDatabase (){
+    mongoose
+        .connect(
+            `mongodb+srv://${process.env.MONGO_USER}:${
+                process.env.MONGO_PASSWORD
+                }@nonoline-pi73v.mongodb.net/${process.env.MONGO_DB}?retryWrites=true`
+        )
+        .then(() => {
+            console.log('Successfully connected to the database.');
+            const PORT = 3000;
+            const HOST = ip.address();
+            app.listen(PORT, HOST);
+            // app.listen(PORT);
+            console.log(`The backend is running on http://${HOST}:${PORT}`);
+            // console.log(`The backend is running on:${PORT}`);
+        })
+        .catch(err => {
+            console.log(err);
+        });
+}
 
-console.log("testing mongodb "+process.env['MONGO_DB'])
-mongoose
-    .connect(
-        `mongodb+srv://${process.env.MONGO_USER}:${
-            process.env.MONGO_PASSWORD
-            }@nonoline-pi73v.mongodb.net/${process.env.MONGO_DB}?retryWrites=true`
-    )
-    .then(() => {
-        console.log('Successfully connected to the database.');
-        const PORT = 3000;
-        const HOST = ip.address();
-        app.listen(PORT, HOST);
-       // app.listen(PORT);
-        console.log(`The backend is running on http://${HOST}:${PORT}`);
-       // console.log(`The backend is running on:${PORT}`);
-    })
-    .catch(err => {
-        console.log(err);
-    });

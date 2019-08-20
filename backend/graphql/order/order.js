@@ -1,33 +1,33 @@
 require('dotenv').config();
 
-const order_schema = require('../../models/order');
+const order_schema = require('./models/order');
 const Order = order_schema.Order;
 const PartialOrder = order_schema.PartialOrder;
 
-const user_schemas = require('../../models/user');
+const user_schemas = require('../user/models/user');
 const RegularUser = user_schemas.RegularUser;
 const BusinessUser = user_schemas.BusinessUser;
 
-const category_schemas = require('../../models/category');
+const category_schemas = require('../category/models/category');
 const GeneralCategory = category_schemas.GeneralCategory;
 
-const cart_schemas = require('../../models/shoppingcart');
+const cart_schemas = require('../shoppingcart/models/shoppingcart');
 const ShoppingCart = cart_schemas.ShoppingCart;
 const ForexRate = cart_schemas.ForexRate;
 
-const shipping_schema = require('../../models/shipping');
+const shipping_schema = require('../shipping/models/shipping');
 const ParcelDeliveryLocation = shipping_schema.ParcelDeliveryLocation;
 
-const address_schema = require('../../models/address');
+const address_schema = require('../shipping/models/address');
 const OrderAddress = address_schema.OrderAddress;
 
-const good_schemas = require('../../models/good');
+const good_schemas = require('../good/models/good');
 const Good = good_schemas.Good;
 const CartGood = good_schemas.CartGood;
 const OrderGood = good_schemas.OrderGood;
 
 const axios = require('axios');
-const {transformOrder} = require('./merge');
+const {transformOrder} = require('../enchancer');
 
 
 //TODO: remove
