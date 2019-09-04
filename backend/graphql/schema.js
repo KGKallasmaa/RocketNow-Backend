@@ -260,6 +260,15 @@ type Index {
   term: String!
   pages: [Good!]!
 }
+type Refinement {
+  _id: ID!
+  total:Int!
+  minPrice: Float!
+  maxPrice:Float!
+  categories:[String!]!,
+  numbericRefinements: [String!],
+  nonNumbericRefinements:[String!],
+}
 input searchInput{
     query:String!
     page_nr:Int!
@@ -270,8 +279,10 @@ input searchInput{
 type RootQuery {
     product_feed(jwt_token:String!): [Good!]!
     search(searchInput:searchInput): [Good!]
-    trending(country:String!):[Good!]
+    refine(query:String!):Refinement!
+    trending:[Good!]
     recommend(jwt_token:String,nr:Int!):[Good!]
+    bestselling(nr:Int!):[Good!]
     autocomplete(query:String!):[Good!]
    
     businessLogin(email: String!, password: String!): AuthData!

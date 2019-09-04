@@ -15,6 +15,7 @@ const SearchIndexSchema = new Schema({
     ]
 });
 
+
 module.exports = {
     'Index': mongoose.model('Index', SearchIndexSchema),
 };
