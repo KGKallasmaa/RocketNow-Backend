@@ -24,15 +24,24 @@ type User {
 type BusinessUser {
   _id: ID!
   nr:Int!
-  businessname: String!
-  logoURL:String!
-  description:String!
+  legalname: String!
+  logoURL:String
+  displayname: String!
+  description: String!
   email: String!
+  IBAN: String!
   password: String!
 }
 type AuthData {
   userFullName: String!
   userImage_URL:String!
+  token: String!
+  tokenExpiration:String!  
+}
+type BusinessAuthData {
+  businessDisplayName: String!
+  businessLegalName: String!
+  logoURL:String!
   token: String!
   tokenExpiration:String!  
 }
@@ -46,8 +55,12 @@ input UserInput {
 }
 
 input BusinessUserInput {
-  businessname: String!
+  legalname: String!
+  logoURL:String
+  displayname: String!
+  description: String!
   email: String!
+  IBAN: String!
   password: String!
 }
 """
@@ -285,14 +298,14 @@ type RootQuery {
     bestselling(nr:Int!):[Good!]
     autocomplete(query:String!):[Good!]
    
-    businessLogin(email: String!, password: String!): AuthData!
+    businessLogin(email: String!, password: String!): BusinessAuthData!
     login(email: String!, password: String!,old_cart_id:String,image_URL:String,loginMethod:String!,fullname:String): AuthData!    
  
     individualUser(jwt_token: String!): User!
     individualBusinessUser(nr:Int!,businessname:String): BusinessUser!
     individualOrder(jwt_token: String!,order_id:String): [Order!]
     individualGood(nr:Int!,jwt_token:String):Good!
-    businessUserGoods(nr:Int!,businessname:String): [Good!]
+    businessUserGoods(nr:Int!,displayname:String): [Good!]
     allGeneralCategories:[GeneralCategory!]!
     getAllMyListedGoods(jwt_token:String!): [Good!]
     individualCart(jwt_token: String!): ShoppingCart
@@ -307,7 +320,7 @@ type RootQuery {
 ##################### Root Mutation #####################
 """
 type RootMutation {
-    createBusinessUser(userInput: BusinessUserInput): BusinessUser!
+    createBusinessUser(userInput: BusinessUserInput): String!
     createUser(userInput: UserInput): String!
     verifyEmail(token:String):AuthData!
     resetPassword(email:String,password:String,mode:String!,token:String):Boolean!

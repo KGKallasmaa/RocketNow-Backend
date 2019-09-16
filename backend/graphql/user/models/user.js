@@ -5,24 +5,37 @@ const Schema = mongoose.Schema;
 const business_userSchema = new Schema({
     nr: {
         type: Number,
-        unique:true,
+        unique: true,
         required: true
     },
-    businessname: {
+    legalname: {
         type: String,
-        required: true
+        required: true,
+        unique: true
+    },
+    displayname: {
+        type: String,
+        required: true,
+        unique:true
     },
     logoURL: {
         type: String,
         required: true,
+        default: "https://res.cloudinary.com/dl7zea2jd/image/upload/v1564247915/defaultPictures/logoNoBackGround_y5tfnq.png"
     },
     description: {
         type: String,
         required: true
     },
+    IBAN: {
+        type: String,
+        required: true,
+        unique: true
+    },
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     password: {
         type: String,
