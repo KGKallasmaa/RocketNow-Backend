@@ -17,13 +17,13 @@ const findRegularUserByEmail = async function findRegularUserByJWT(email) {
     return await RegularUser.findOne({email: email});
 };
 
-const findBusinessUserByNrAndBusinessName = async function findBusinessUserByNrAndBusinessName(nr,businessname) {
-    return await BusinessUser.findOne({nr:nr,businessname:businessname});
+const findBusinessUserByNrAndDisplayName = async function findBusinessUserByNrAndBusinessName(nr,displayname) {
+    return await BusinessUser.findOne({nr:nr,displayname:displayname});
 };
 
 
 module.exports = {
     'findRegularUserByJWT': findRegularUserByJWT,
-    'findBusinessUserByNrAndBusinessName':findBusinessUserByNrAndBusinessName,
+    'findBusinessUserByNrAndDisplayName':findBusinessUserByNrAndDisplayName,
     'findRegularUserByEmail':findRegularUserByEmail
 };
