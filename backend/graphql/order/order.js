@@ -419,8 +419,7 @@ module.exports = {
 
         const SuccessUrl = process.env.CLIENT_URL + "/success/" + UNICUE_ORDER_ID;
         const CancelUrl = process.env.CLIENT_URL + "/cancel/" + UNICUE_ORDER_ID;
-
-
+        
         const session = await stripe.checkout.sessions.create({
             customer_email: regular_user.email,
             payment_method_types: ['card'],
@@ -432,7 +431,6 @@ module.exports = {
             cancel_url: CancelUrl,
         });
         console.log("User # " + regular_user._id + " entered checkout ");
-
         return {sessionId: session.id};
     },
     orderGoods: async args => {
