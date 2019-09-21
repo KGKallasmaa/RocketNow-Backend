@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 
-const generalCategorySchema = new Schema({
+const generalcategorySchema = new Schema({
     name: {
         type: String,
         required: true,
@@ -17,5 +17,5 @@ const generalCategorySchema = new Schema({
 
 
 module.exports = {
-    'GeneralCategory': mongoose.model('GeneralCategory', generalCategorySchema),
+    'GeneralCategory': mongoose.model('GeneralCategory', generalcategorySchema),
 };

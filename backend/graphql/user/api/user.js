@@ -179,7 +179,7 @@ async function addGoodsFromPreLoginToMain(userId, pre_login_shoppingcartId) {
 
     for (let i = 0; i < pre_login_shoppingcart.goods.length; i++) {
         const cartgood = await CartGood.findById(pre_login_shoppingcart.goods[i]);
-         shoppingcartResolver.addToCart({
+        shoppingcartResolver.addToCart({
             cart_identifier: userId,
             good_id: cartgood.good,
             quantity: cartgood.quantity
@@ -187,7 +187,8 @@ async function addGoodsFromPreLoginToMain(userId, pre_login_shoppingcartId) {
         toBeDeletedIds.push(cartgood._id);
     }
 
-    CartGood.deleteMany({id: { $in: toBeDeletedIds}}, function(err) {});
+    CartGood.deleteMany({id: {$in: toBeDeletedIds}}, function (err) {
+    });
     ShoppingCart.findByIdAndDelete(pre_login_shoppingcart._id);
     return await ShoppingCart.findOne({"cart_identifier": userId});
 }
@@ -199,16 +200,14 @@ async function UpdateShoppingCart(userId, old_cart_id) {
 
     const preLoginCartIsPresent = pre_login_shoppingcart !== null;
     const mainShoppingCartIsPresent = main_shoppingcart !== null;
-    const preLoginCartHasGoods = (preLoginCartIsPresent) ? pre_login_shoppingcart.goods.length >0: false;
+    const preLoginCartHasGoods = (preLoginCartIsPresent) ? pre_login_shoppingcart.goods.length > 0 : false;
 
 
-    if (!preLoginCartIsPresent && !mainShoppingCartIsPresent){
+    if (!preLoginCartIsPresent && !mainShoppingCartIsPresent) {
         return true;
-    }
-    else if (!preLoginCartHasGoods && mainShoppingCartIsPresent){
+    } else if (!preLoginCartHasGoods && mainShoppingCartIsPresent) {
         return main_shoppingcart;
-    }
-    else if (preLoginCartHasGoods){
+    } else if (preLoginCartHasGoods) {
         return await addGoodsFromPreLoginToMain(userId, old_cart_id);
     }
 }
@@ -287,8 +286,8 @@ module.exports = {
         }
         return {...user._doc, password: null, _id: user.id};
     },
-    individualBusinessUser: async ({nr,businessname}) => {
-        const user = await userService.findBusinessUserByNrAndBusinessName(nr,businessname);
+    individualBusinessUser: async ({nr, displayname}) => {
+        const user = await userService.findBusinessUserByNrAndDisplayName(nr,displayname);
         if (!user) {
             return Error('Business user was not found');
         }
@@ -400,29 +399,35 @@ module.exports = {
         };
     },
     createBusinessUser: async args => {
-        try {
-            const existingUser = await BusinessUser.findOne({
-                email: args.userInput.email
-            });
 
-            if (existingUser) throw new Error('BusinessUser exists already.');
+        const existingUser = await BusinessUser.findOne({
+            email: args.userInput.email
+        });
 
-            const hashedPassword = await bcrypt.hash(args.userInput.password, 12);
-            const user = new BusinessUser({
-                businessname: args.userInput.businessname,
-                nr:await BusinessUser.find().length+1,
-                email: args.userInput.email,
-                password: hashedPassword
-            });
-            const result = await user.save();
-            return {
-                ...result._doc,
-                password: null,
-                _id: result.id
-            };
-        } catch (err) {
-            throw err;
-        }
+        if (existingUser) return Error('User with that email already exsits. Try logging in');
+        const nrOfBusinessUsers = await BusinessUser.find().count();
+
+        const current_time = new Date().getTime();
+        const expires_in = 3600000;
+        const expiresIn_as_String = (current_time + expires_in).toString();
+
+
+        const hashedPassword = await bcrypt.hash(args.userInput.password, 12);
+        const user = new BusinessUser({
+            nr: nrOfBusinessUsers + 1,
+            legalname: args.userInput.legalname,
+            displayname: args.userInput.displayname,
+            logoURL: args.userInput.logoURL,
+            description: args.userInput.description,
+            IBAN: args.userInput.IBAN,
+            email: args.userInput.email,
+            password: hashedPassword
+        });
+        const result = await user.save();
+
+        console.info("New business user #" + result._id + " was created.");
+        //TODO: change key
+        return jwt.sign({userId: user.id}, process.env.BUSINESS_JWT_KEY, {expiresIn: expiresIn_as_String});
     },
     businessLogin: async ({email, password}) => {
         //1. Validate the email and password are correct
@@ -430,23 +435,25 @@ module.exports = {
             email: email
         });
 
-        if (!user) throw new Error('BusinessUser does not exist!');
+        if (!user) return Error('BusinessUser does not exist!');
 
         const pw_is_correct = await bcrypt.compare(password, user.password);
-        if (!pw_is_correct) throw new Error('BusinessPassword is not correct.');
+        if (!pw_is_correct) return Error('BusinessPassword is not correct.');
         //2. Return a token
-        const KEY = process.env.BUSINESS_JWT_KEY;
         const current_time = new Date().getTime();
         const expires_in = 3600000; //expires in one hour
 
         const token = jwt.sign({
             userId: user.id,
             email: user.email
-        }, KEY, {
+        }, process.env.BUSINESS_JWT_KEY, {
             expiresIn: expires_in + current_time
         });
+
         return {
-            userId: user.id,
+            businessDisplayName: user.displayname,
+            businessLegalName:user.legalname,
+            logoURL:user.logoURL,
             token: token,
             tokenExpiration: expires_in + current_time
         };
@@ -467,7 +474,7 @@ module.exports = {
                 $set: {verificationCode: token,}
             }, {upsert: true}, function (err) {
             });
-            await sendEmail(token,user.email, user._id, "verifyEmail");
+            await sendEmail(token, user.email, user._id, "verifyEmail");
             return Error("Your verification code has expired. We sent a new email");
         }
         ;
@@ -544,7 +551,7 @@ module.exports = {
                     }
                 }, {upsert: true}, function (err) {
                 });
-                console.info("User #"+user._id+" successfully reset their password.");
+                console.info("User #" + user._id + " successfully reset their password.");
                 return true;
             }
             default:
