@@ -194,3 +194,4 @@ exports.transformShoppingCart = transformShoppingCart;
 exports.user = user;
 exports.businessuser = businessuser;
 exports.transformOrder = transformOrder;
+exports.transformPartialOrder = transformPartialOrder;

@@ -2,13 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e9db1be9-be9c-4cf7-8281-2856888f3bce" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/backend/graphql/warehouse/api/warehouse.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/graphql/warehouse/services/findExcepencesTotal.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/graphql/warehouse/services/findOrder.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/graphql/warehouse/services/warehouseManagement.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/graphql/order/order.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/graphql/order/order.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/nodemon.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/nodemon.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/graphql/enchancer.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/graphql/enchancer.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/graphql/resolverMerger.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/graphql/resolverMerger.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/graphql/schema.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/graphql/schema.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/graphql/user/api/user.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/graphql/user/api/user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/graphql/user/services/findUser.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/backend/graphql/user/services/findUser.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/graphql/warehouse/warehouse.js" beforeDir="false" />
     </list>
-    <ignored path="$PROJECT_DIR$/.tmp/" />
-    <ignored path="$PROJECT_DIR$/temp/" />
-    <ignored path="$PROJECT_DIR$/tmp/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,105 +21,59 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+    <leaf>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/backend/graphql/schema.js">
+        <entry file="file://$PROJECT_DIR$/backend/package.json">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/backend/graphql/warehouse/api/warehouse.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="150">
+              <caret line="10" column="22" selection-start-line="10" selection-start-column="22" selection-end-line="10" selection-end-column="22" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/backend/graphql/warehouse/services/findExcepencesTotal.jsx">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/backend/graphql/warehouse/services/warehouseManagement.jsx">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="195">
+              <caret line="13" column="22" lean-forward="true" selection-start-line="13" selection-start-column="22" selection-end-line="13" selection-end-column="22" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/backend/graphql/warehouse/services/findOrder.jsx">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="45">
-              <caret line="16" column="21" selection-start-line="16" selection-start-column="21" selection-end-line="16" selection-end-column="21" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/backend/graphql/enchancer.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="5" column="25" selection-start-line="5" selection-start-column="25" selection-end-line="5" selection-end-column="25" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/backend/graphql/shoppingcart/shoppingcart.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="325">
-              <caret line="27" selection-start-line="27" selection-end-line="27" />
+              <caret line="3" selection-start-line="3" selection-end-line="3" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/backend/graphql/order/order.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="419">
-              <caret line="421" column="8" selection-start-line="421" selection-start-column="8" selection-end-line="421" selection-end-column="8" />
-              <folding>
-                <element signature="n#!!block;n#test#0" />
-                <element signature="n#!!block;n#groupCartGoodsByBusinessAndUpdateBookedQuantity#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/backend/package.json">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="630">
-              <caret line="42" column="21" selection-start-line="42" selection-start-column="21" selection-end-line="42" selection-end-column="21" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/backend/nodemon.json">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="15" column="47" lean-forward="true" selection-start-line="2" selection-start-column="4" selection-end-line="15" selection-end-column="47" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/backend/.env">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="60">
-              <caret line="4" selection-start-line="4" selection-end-line="4" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/backend/graphql/user/api/user.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1036">
-              <caret line="452" selection-start-line="452" selection-end-line="452" />
+            <state relative-caret-position="530">
+              <caret line="428" selection-start-line="428" selection-end-line="428" />
               <folding>
                 <element signature="n#!!block;n#sendEmail#0" />
+                <element signature="n#!!block;n#addGoodsFromPreLoginToMain#0" />
+                <element signature="n#!!block;n#UpdateShoppingCart#0" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/backend/graphql/user/models/user.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="300">
-              <caret line="20" column="11" selection-start-line="20" selection-start-column="11" selection-end-line="20" selection-end-column="11" />
             </state>
           </provider>
         </entry>
       </file>
     </leaf>
-  </component>
-  <component name="FindInProjectRecents">
-    <findStrings>
-      <find>console.log</find>
-      <find>axios</find>
-      <find>business</find>
-      <find>login</find>
-      <find>proce</find>
-    </findStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -122,29 +81,10 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/backend/graphql/resolvers/good.js" />
-        <option value="$PROJECT_DIR$/backend/graphql/resolvers/order.js" />
-        <option value="$PROJECT_DIR$/backend/graphql/resolvers/shipping.js" />
-        <option value="$PROJECT_DIR$/backend/graphql/resolvers/category.js" />
-        <option value="$PROJECT_DIR$/backend/graphql/resolvers/shoppingcart.js" />
-        <option value="$PROJECT_DIR$/backend/graphql/resolvers/user.js" />
-        <option value="$PROJECT_DIR$/backend/graphql/resolvers/warehouse.js" />
-        <option value="$PROJECT_DIR$/backend/.dockerignore" />
-        <option value="$PROJECT_DIR$/backend/docker-compose.yml" />
-        <option value="$PROJECT_DIR$/backend/package.json" />
-        <option value="$PROJECT_DIR$/backend/Dockerfile" />
-        <option value="$PROJECT_DIR$/backend/app.js" />
-        <option value="$PROJECT_DIR$/backend/graphql/schema/index.js" />
-        <option value="$PROJECT_DIR$/backend/graphql/resolvers/search.js" />
-        <option value="$PROJECT_DIR$/backend/graphql/category/models/generalCategory.js" />
-        <option value="$PROJECT_DIR$/backend/graphql/user/models/user.js" />
-        <option value="$PROJECT_DIR$/backend/graphql/user/services/findUser.jsx" />
-        <option value="$PROJECT_DIR$/backend/graphql/schema.js" />
+        <option value="$PROJECT_DIR$/backend/graphql/warehouse/api/warehouse.js" />
+        <option value="$PROJECT_DIR$/backend/graphql/warehouse/services/warehouseManagement.jsx" />
+        <option value="$PROJECT_DIR$/backend/graphql/warehouse/services/findOrder.jsx" />
         <option value="$PROJECT_DIR$/backend/graphql/user/api/user.js" />
-        <option value="$PROJECT_DIR$/backend/nodemon.json" />
-        <option value="$PROJECT_DIR$/backend/.env" />
-        <option value="$PROJECT_DIR$/backend/graphql/shoppingcart/shoppingcart.js" />
-        <option value="$PROJECT_DIR$/backend/graphql/order/order.js" />
       </list>
     </option>
   </component>
@@ -164,12 +104,12 @@
     <option name="width" value="2502" />
     <option name="height" value="1417" />
   </component>
+  <component name="ProjectId" id="1RKUabwxm8o2al6ZzjTV8ZbHOtE" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -193,12 +133,29 @@
               <item name="RocketNow-Backend" type="462c0819:PsiDirectoryNode" />
               <item name="backend" type="462c0819:PsiDirectoryNode" />
               <item name="graphql" type="462c0819:PsiDirectoryNode" />
-              <item name="order" type="462c0819:PsiDirectoryNode" />
+              <item name="user" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="RocketNow-Backend" type="b2602c69:ProjectViewProjectNode" />
+              <item name="RocketNow-Backend" type="462c0819:PsiDirectoryNode" />
+              <item name="backend" type="462c0819:PsiDirectoryNode" />
+              <item name="graphql" type="462c0819:PsiDirectoryNode" />
+              <item name="user" type="462c0819:PsiDirectoryNode" />
+              <item name="api" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="RocketNow-Backend" type="b2602c69:ProjectViewProjectNode" />
+              <item name="RocketNow-Backend" type="462c0819:PsiDirectoryNode" />
+              <item name="backend" type="462c0819:PsiDirectoryNode" />
+              <item name="graphql" type="462c0819:PsiDirectoryNode" />
+              <item name="user" type="462c0819:PsiDirectoryNode" />
+              <item name="models" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -213,6 +170,7 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/backend/graphql/warehouse/api" />
       <recent name="$PROJECT_DIR$/backend" />
     </key>
   </component>
@@ -288,6 +246,10 @@
       <workItem from="1568296711439" duration="2393000" />
       <workItem from="1568382941064" duration="333000" />
       <workItem from="1568660654507" duration="4152000" />
+      <workItem from="1569261587303" duration="15810000" />
+      <workItem from="1569415349394" duration="1530000" />
+      <workItem from="1569438003820" duration="6947000" />
+      <workItem from="1569566315086" duration="612000" />
     </task>
     <task id="LOCAL-00001" summary="Supporting front end business user sign-up and login fun.">
       <created>1568661561267</created>
@@ -300,198 +262,119 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="36904000" />
+    <option name="totallyTimeSpent" value="612000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="58" y="23" width="2502" height="1417" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17734784" />
+      <window_info id="Favorites" side_tool="true" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24989924" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Docker" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" />
+      <window_info anchor="bottom" id="GraphQL" />
+      <window_info anchor="bottom" id="Terminal" />
+      <window_info anchor="bottom" id="Event Log" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.42339623" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.32981133" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" weight="0.32995495" />
-      <window_info anchor="bottom" id="GraphQL" order="8" />
-      <window_info anchor="bottom" id="Version Control" order="9" />
-      <window_info anchor="bottom" id="Terminal" order="10" weight="0.5007299" />
-      <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
     </layout>
-    <layout-to-restore>
-      <window_info id="Favorites" order="0" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="1" visible="true" weight="0.3858795" />
-      <window_info id="Structure" order="2" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Docker" order="0" weight="0.32995495" />
-      <window_info anchor="bottom" id="GraphQL" order="1" />
-      <window_info anchor="bottom" id="Terminal" order="2" visible="true" weight="0.5011261" />
-      <window_info anchor="bottom" id="Version Control" order="3" />
-      <window_info anchor="bottom" id="Event Log" order="4" side_tool="true" />
-      <window_info anchor="bottom" id="Message" order="5" />
-      <window_info anchor="bottom" id="Find" order="6" />
-      <window_info anchor="bottom" id="Run" order="7" weight="0.15731166" />
-      <window_info anchor="bottom" id="Debug" order="8" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="9" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="10" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="11" />
-      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-    </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list />
+          </value>
+        </entry>
+        <entry key="User">
+          <value>
+            <list />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Supporting front end business user sign-up and login fun." />
     <option name="LAST_COMMIT_MESSAGE" value="Supporting front end business user sign-up and login fun." />
   </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/backend/graphql/warehouse/services/findExcepencesTotal.jsx</url>
+          <line>2</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/backend/node_modules/.env" />
-    <entry file="file://$PROJECT_DIR$/backend/models/address.js" />
-    <entry file="file://$PROJECT_DIR$/backend/graphql/resolvers/warehouse.js" />
-    <entry file="file://$PROJECT_DIR$/backend/graphql/resolvers/user.js" />
-    <entry file="file://$PROJECT_DIR$/backend/graphql/resolvers/shoppingcart.js" />
-    <entry file="file://$PROJECT_DIR$/backend/graphql/resolvers/merge.js" />
-    <entry file="file://$PROJECT_DIR$/backend/graphql/resolvers/good.js" />
-    <entry file="file://$PROJECT_DIR$/backend/graphql/resolvers/index.js" />
-    <entry file="file://$PROJECT_DIR$/backend/graphql/resolvers/shipping.js" />
-    <entry file="file://$PROJECT_DIR$/backend/docker-compose.yml" />
-    <entry file="file://$PROJECT_DIR$/backend/graphql/resolvers/order.js" />
-    <entry file="file://$PROJECT_DIR$/backend/.env" />
-    <entry file="file://$PROJECT_DIR$/backend/graphql/resolvers/category.js" />
-    <entry file="file://$PROJECT_DIR$/backend/graphql/resolvers/search.js" />
-    <entry file="file://$PROJECT_DIR$/backend/graphql/schema/index.js" />
-    <entry file="file://$PROJECT_DIR$/backend/graphql/category/models/generalCategory.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="20" column="2" selection-start-line="20" selection-start-column="2" selection-end-line="20" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backend/graphql/good/good.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#994#8376#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backend/graphql/user/services/findUser.jsx">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="19" column="108" selection-start-line="19" selection-start-column="97" selection-end-line="19" selection-end-column="108" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backend/.gitignore">
+    <entry file="file://$PROJECT_DIR$/backend/package.json">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/backend/app.js">
+    <entry file="file://$PROJECT_DIR$/backend/graphql/warehouse/api/warehouse.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="515">
-          <caret line="56" column="19" selection-start-line="56" selection-start-column="19" selection-end-line="56" selection-end-column="19" />
+        <state relative-caret-position="150">
+          <caret line="10" column="22" selection-start-line="10" selection-start-column="22" selection-end-line="10" selection-end-column="22" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/backend/Dockerfile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="19" selection-start-line="19" selection-end-line="19" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backend/.dockerignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="1" column="13" selection-start-line="1" selection-start-column="13" selection-end-line="1" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backend/package-lock.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="495">
-          <caret line="33" column="12" selection-start-line="33" selection-start-column="12" selection-end-line="33" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backend/graphql/user/models/user.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="20" column="11" selection-start-line="20" selection-start-column="11" selection-end-line="20" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backend/graphql/category/api/category.js">
+    <entry file="file://$PROJECT_DIR$/backend/graphql/warehouse/services/findExcepencesTotal.jsx">
       <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/backend/graphql/warehouse/services/warehouseManagement.jsx">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="13" column="22" lean-forward="true" selection-start-line="13" selection-start-column="22" selection-end-line="13" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/backend/graphql/warehouse/services/findOrder.jsx">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" selection-start-line="3" selection-end-line="3" />
+        </state>
+      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/backend/graphql/user/api/user.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1036">
-          <caret line="452" selection-start-line="452" selection-end-line="452" />
+        <state relative-caret-position="530">
+          <caret line="428" selection-start-line="428" selection-end-line="428" />
           <folding>
             <element signature="n#!!block;n#sendEmail#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backend/package.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="630">
-          <caret line="42" column="21" selection-start-line="42" selection-start-column="21" selection-end-line="42" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backend/.env">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" selection-start-line="4" selection-end-line="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backend/nodemon.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="15" column="47" lean-forward="true" selection-start-line="2" selection-start-column="4" selection-end-line="15" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backend/graphql/schema.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="16" column="21" selection-start-line="16" selection-start-column="21" selection-end-line="16" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backend/graphql/enchancer.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="25" selection-start-line="5" selection-start-column="25" selection-end-line="5" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backend/graphql/shoppingcart/shoppingcart.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="325">
-          <caret line="27" selection-start-line="27" selection-end-line="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backend/graphql/order/order.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="419">
-          <caret line="421" column="8" selection-start-line="421" selection-start-column="8" selection-end-line="421" selection-end-column="8" />
-          <folding>
-            <element signature="n#!!block;n#test#0" />
-            <element signature="n#!!block;n#groupCartGoodsByBusinessAndUpdateBookedQuantity#0" />
+            <element signature="n#!!block;n#addGoodsFromPreLoginToMain#0" />
+            <element signature="n#!!block;n#UpdateShoppingCart#0" />
           </folding>
         </state>
       </provider>

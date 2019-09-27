@@ -305,9 +305,18 @@ type RootQuery {
     individualBusinessUser(nr:Int!,businessname:String): BusinessUser!
     individualOrder(jwt_token: String!,order_id:String): [Order!]
     individualGood(nr:Int!,jwt_token:String):Good!
+    
+    individualPartialOrder(partial_order_id:String!):PartialOrder!
+    partialOrdersNotYetShipped(jwt_token:String!):[PartialOrder!]
+    productsInWarehouse(jwt_token:String!):[Good!]
+    thisMonthsRevenue(jwt_token:String!):Float!
+    thisYearsRevenue(jwt_token:String!):Float!
+    thisMonthsExpenses(jwt_token:String!):Float!
+    thisYearsExpenses(jwt_token:String!):Float!
+    
+    
     businessUserGoods(nr:Int!,displayname:String): [Good!]
     allGeneralCategories:[GeneralCategory!]!
-    getAllMyListedGoods(jwt_token:String!): [Good!]
     individualCart(jwt_token: String!): ShoppingCart
     ParcelDeliveryLocations(UserLatCoordinate: Float!,UserLonCoordinate: Float!):[ParcelDeliveryLocation!]
     numberOfGoodsInCartAndSubtotalAndTax(jwt_token: String!):[Float!]!
