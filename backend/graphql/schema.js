@@ -182,6 +182,41 @@ type ParcelDeliveryLocation{
     x_coordinate:Float!
     y_coordinate:Float!
 }
+
+"""
+##################### Warehouse #####################
+"""
+
+type MonthAndRevenue {
+  Jan: Float
+  Feb: Float
+  Mar: Float
+  Apr: Float
+  May: Float
+  June: Float
+  July: Float
+  Aug: Float
+  Sep: Float
+  Okt: Float
+  Nov: Float
+  Dec: Float
+}
+type MonthAndCount {
+  Jan: Int
+  Feb: Int
+  Mar: Int
+  Apr: Int
+  May: Int
+  June: Int
+  July: Int
+  Aug: Int
+  Sep: Int
+  Okt: Int
+  Nov: Int
+  Dec: Int
+}
+
+
 """
 ##################### Orders #####################
 """
@@ -305,9 +340,18 @@ type RootQuery {
     individualBusinessUser(nr:Int!,businessname:String): BusinessUser!
     individualOrder(jwt_token: String!,order_id:String): [Order!]
     individualGood(nr:Int!,jwt_token:String):Good!
+    
+    individualPartialOrder(partial_order_id:String!):PartialOrder!
+    partialOrdersNotYetShipped(jwt_token:String!):[PartialOrder!]
+    productsInWarehouse(jwt_token:String!):[Good!]
+    thisMonthsRevenue(jwt_token:String!):Float!
+    thisYearsRevenue(jwt_token:String!):Float!
+    thisMonthsExpenses(jwt_token:String!):Float!
+    thisYearsExpenses(jwt_token:String!):Float!
+    
+    
     businessUserGoods(nr:Int!,displayname:String): [Good!]
     allGeneralCategories:[GeneralCategory!]!
-    getAllMyListedGoods(jwt_token:String!): [Good!]
     individualCart(jwt_token: String!): ShoppingCart
     ParcelDeliveryLocations(UserLatCoordinate: Float!,UserLonCoordinate: Float!):[ParcelDeliveryLocation!]
     numberOfGoodsInCartAndSubtotalAndTax(jwt_token: String!):[Float!]!
