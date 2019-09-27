@@ -1,6 +1,22 @@
 require('dotenv').config();
 
-const findPartialOrdersRevenue = async function findPartialOrdersRevenue(partialOrders){
+//Constants
+const monthDictionary = {
+    "1": "Jan ",
+    "2": "Feb ",
+    "3": "Mar ",
+    "4": "Apr ",
+    "5": "May ",
+    "6": "June ",
+    "7": "July ",
+    "8": "Aug ",
+    "9": "Sep ",
+    "10": "Okt ",
+    "11": "Nov ",
+    "12": "Dec ",
+};
+
+const findPartialOrdersRevenue = async function findPartialOrdersRevenue(partialOrders) {
     let sum = 0;
     for (let i = 0; i < partialOrders.length; i++) {
         sum += partialOrders[i].partial_subtotal;
@@ -8,53 +24,97 @@ const findPartialOrdersRevenue = async function findPartialOrdersRevenue(partial
     return sum;
 };
 
-const findAllExpenses = async function findPartialOrdersRevenue(orders,partialOrders){
-    /*
-    TODO: verify calcluations
-    */
-    /*
-      Example order
-      Order price: 120€ (with VAT)
-      Shipping cost: 5€ (with VAT)
-
-      Order without VAT: 120/1.2 + 5/1.2 = 100 + 4.16 =  104.16
-      StripeFee: 125*1.4% +0.25 = 2
-      RocketNowFee: 104.16*0.1 = 10.41
-
-     Money RocketNow received: 125-2 = 123
-     Money RocketNow pays to the government (VAT) = 125-104.16 = 20.84
-       */
-
-    /*
-   Expenses:
-   1. Shipping fee = -4.16
-   2. Stripe fee = +2
-   3. RocketNow fee = +10.41
-   4. Total = -4.16+2+10.41 = 8.25
-    */
-
-    let expences = 0;
+const findAllExpenses = async function findPartialOrdersRevenue(orders, partialOrders) {
+    let expenses = 0;
     //Partial-order related fees
     for (let i = 0; i < partialOrders.length; i++) {
         const partialOrderShippingCost_with_Tax = partialOrders[i].partial_shipping_cost;
-        const partialOrderShippingCost_withOut_Tax = partialOrderShippingCost_with_Tax/(1+0.2); //Value added TAX for shipping is 20% in Estonia
-        expences -= partialOrderShippingCost_withOut_Tax;
+        const partialOrderShippingCost_withOut_Tax = partialOrderShippingCost_with_Tax / (1 + 0.2); //Value added TAX for shipping is 20% in Estonia
+        expenses -= partialOrderShippingCost_withOut_Tax;
 
-        const stripeVariableFee = partialOrders[i].partial_subtotal*(0.014);
-        expences += stripeVariableFee;
+        const stripeVariableFee = partialOrders[i].partial_subtotal * (0.014);
+        expenses += stripeVariableFee;
     }
     //Order related fees
     for (let i = 0; i < orders.length; i++) {
-       const stripeFixedFee = 0.25/orders[i].partial_orders.length;
-       expences +=stripeFixedFee;
+        const stripeFixedFee = 0.25 / orders[i].partial_orders.length;
+        expenses += stripeFixedFee;
 
-       const rocketNowFee = (orders[i].subtotal-orders[i].tax_cost)*0.1; // RocketNow fee is 10%
-       expences += rocketNowFee;
+        const rocketNowFee = (orders[i].subtotal - orders[i].tax_cost) * 0.1; // RocketNow fee is 10%
+        expenses += rocketNowFee;
     }
-    return expences;
+    return expenses;
+};
+
+const findPartialOrdersRevenueGroupByMonth = async function findPartialOrdersRevenue(partialOrders) {
+    const currentTime = new Date();
+    const thisMonth = currentTime.getMonth();
+
+    const monthAndRevenue = {
+        Jan: 0.0,
+        Feb: 0.0,
+        Mar: 0.0,
+        Apr: 0.0,
+        May: 0.0,
+        June: 0.0,
+        July: 0.0,
+        Aug: 0.0,
+        Sep: 0.0,
+        Okt: 0.0,
+        Nov: 0.0,
+        Dec: 0.0,
+    };
+
+    for (let i = 1; i <= thisMonth; i++) {
+        const monthAsString = monthDictionary[i];
+        let sum = 0;
+        const start = new Date(currentTime.getFullYear(), i, 1).getTime();
+        const finish = new Date(currentTime.getFullYear(), i, 31).getTime();
+
+        const suitablePartialOrders = partialOrders.find({
+            age: {$gt: start, $lt: finish}
+        });
+        for (let j = 0; j < suitablePartialOrders.length; j++) {
+            sum += suitablePartialOrders[j].partial_subtotal
+        }
+        monthAndRevenue[monthAsString] = sum;
+    }
+    return monthAndRevenue;
+};
+const findPartialOrdersCountGroupByMonth = async function findPartialOrdersRevenue(partialOrders) {
+    const currentTime = new Date();
+    const thisMonth = currentTime.getMonth();
+
+    const monthAndCount = {
+        Jan: 0,
+        Feb: 0,
+        Mar: 0,
+        Apr: 0,
+        May: 0,
+        June: 0,
+        July: 0,
+        Aug: 0,
+        Sep: 0,
+        Okt: 0,
+        Nov: 0,
+        Dec: 0,
+    };
+
+    for (let i = 1; i <= thisMonth; i++) {
+        const monthAsString = monthDictionary[i];
+        const start = new Date(currentTime.getFullYear(), i, 1).getTime();
+        const finish = new Date(currentTime.getFullYear(), i, 31).getTime();
+
+        monthAndCount[monthAsString] = partialOrders.find({
+            age: {$gt: start, $lt: finish}
+        }).length;
+    }
+    return monthAndCount;
 };
 
 module.exports = {
     'findPartialOrdersRevenue': findPartialOrdersRevenue,
     'findAllExpenses': findAllExpenses,
+    'findPartialOrdersRevenueGroupByMonth': findPartialOrdersRevenueGroupByMonth,
+    'findPartialOrdersCountGroupByMonth': findPartialOrdersCountGroupByMonth
 };

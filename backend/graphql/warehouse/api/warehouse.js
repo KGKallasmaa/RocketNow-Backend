@@ -48,5 +48,19 @@ module.exports = {
         const allPartialOrders = findOrderService.findPartialOrdersBetweenDates(jwt_token, thisYearStartTime, thisYearEndTime);
         const allOrders = findOrderService.findPartialOrdersBetweenDates(jwt_token, thisYearStartTime, thisYearEndTime);
         return findExpensesTotalService.findAllExpenses(allOrders, allPartialOrders);
+    },
+    thisYearsOrdersSum: async ({jwt_token}) => {
+        const thisYearStartTime = new Date(new Date().getFullYear(), 1, 1).getTime();
+        const thisYearEndTime = new Date(new Date().getFullYear(), 12, 31).getTime();
+        const allPartialOrders = findOrderService.findPartialOrdersBetweenDates(jwt_token, thisYearStartTime, thisYearEndTime);
+        return findExpensesTotalService.findPartialOrdersRevenueGroupByMonth(allPartialOrders);
+
+
+    },
+    thisYearsOrdersCount: async ({jwt_token}) => {
+        const thisYearStartTime = new Date(new Date().getFullYear(), 1, 1).getTime();
+        const thisYearEndTime = new Date(new Date().getFullYear(), 12, 31).getTime();
+        const allPartialOrders = findOrderService.findPartialOrdersBetweenDates(jwt_token, thisYearStartTime, thisYearEndTime);
+        return findExpensesTotalService.findPartialOrdersCountGroupByMonth(allPartialOrders);
     }
 };

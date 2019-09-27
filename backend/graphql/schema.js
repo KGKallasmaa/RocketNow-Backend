@@ -182,6 +182,41 @@ type ParcelDeliveryLocation{
     x_coordinate:Float!
     y_coordinate:Float!
 }
+
+"""
+##################### Warehouse #####################
+"""
+
+type MonthAndRevenue {
+  Jan: Float
+  Feb: Float
+  Mar: Float
+  Apr: Float
+  May: Float
+  June: Float
+  July: Float
+  Aug: Float
+  Sep: Float
+  Okt: Float
+  Nov: Float
+  Dec: Float
+}
+type MonthAndCount {
+  Jan: Int
+  Feb: Int
+  Mar: Int
+  Apr: Int
+  May: Int
+  June: Int
+  July: Int
+  Aug: Int
+  Sep: Int
+  Okt: Int
+  Nov: Int
+  Dec: Int
+}
+
+
 """
 ##################### Orders #####################
 """
