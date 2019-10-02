@@ -117,12 +117,8 @@ input goodInput {
   title:String!
   description:String!
   quantity:Int!
-  current_price:Float!
   listing_price: Float!
-  listing_timestamp:String!
   general_category_name: String!
-  main_image_cloudinary_public_id:String!
-  other_images_cloudinary_public_id:[String!]
   main_image_cloudinary_secure_url:String!
   other_images_cloudinary_secure_url:[String!]
   currency:String!
@@ -337,7 +333,7 @@ type RootQuery {
     login(email: String!, password: String!,old_cart_id:String,image_URL:String,loginMethod:String!,fullname:String): AuthData!    
  
     individualUser(jwt_token: String!): User!
-    individualBusinessUser(nr:Int!,businessname:String): BusinessUser!
+    individualBusinessUser(nr:Int!,displayname:String): BusinessUser!
     individualOrder(jwt_token: String!,order_id:String): [Order!]
     individualGood(nr:Int!,jwt_token:String):Good!
     

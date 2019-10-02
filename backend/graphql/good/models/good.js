@@ -22,7 +22,8 @@ const goodSchema = new Schema({
     },
     booked: {
         type:Number,
-        required:true
+        required:true,
+        default:0
     },
     current_price: {
         type: Number,
@@ -33,8 +34,9 @@ const goodSchema = new Schema({
         required: true
     },
     listing_timestamp: {
-        type: Number,
-        required: true
+        type:Date,
+        required: true,
+        default: new Date()
     },
     general_category: {
         type: Schema.Types.ObjectId,
