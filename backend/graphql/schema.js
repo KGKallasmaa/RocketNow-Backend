@@ -299,35 +299,19 @@ type OrderAddress {
 """
 ##################### Search #####################
 """
-type Index {
-  _id: ID!
-  term: String!
-  pages: [Good!]!
-}
 type Refinement {
-  _id: ID!
-  total:Int!
-  minPrice: Float!
-  maxPrice:Float!
-  categories:[String!]!,
-  numbericRefinements: [String!],
-  nonNumbericRefinements:[String!],
+  numericRefinements:[String!],
+  nonNumericRefinements:[String!],
 }
-input searchInput{
-    query:String!
-    page_nr:Int!
-}
+
 """
 ##################### Root Query #####################
 """
 type RootQuery {
-    product_feed(jwt_token:String!): [Good!]!
-    search(searchInput:searchInput): [Good!]
-    refine(query:String!):Refinement!
+    search(query: String!):Refinement
     trending:[Good!]
     recommend(jwt_token:String,nr:Int!):[Good!]
     bestselling(nr:Int!):[Good!]
-    autocomplete(query:String!):[Good!]
    
     businessLogin(email: String!, password: String!): BusinessAuthData!
     login(email: String!, password: String!,old_cart_id:String,image_URL:String,loginMethod:String!,fullname:String): AuthData!    

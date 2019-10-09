@@ -1,6 +1,6 @@
 const userResolver = require('./user/api/user');
 const goodResolver = require('./good/good');
-const searchResolver = require('./search/search');
+const searchResolver = require('./search/api/search');
 const shoppingcartResolver = require('./shoppingcart/shoppingcart');
 const categoryResolver = require('./category/api/category');
 const warehouseResolver = require('./warehouse/api/warehouse');
