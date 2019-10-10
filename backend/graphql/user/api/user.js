@@ -18,6 +18,7 @@ const shoppingcartResolver = require('../../shoppingcart/shoppingcart');
 
 const nodemailer = require('nodemailer');
 const userService = require('../services/findUser.jsx');
+const shoppingCartService = require('../../shoppingcart/services/shoppingCartService.jsx');
 
 const emailVerificationService = nodemailer.createTransport({
     service: 'gmail',
@@ -172,45 +173,6 @@ async function sendEmail(token, toEmail, userId, type) {
     return false
 }
 
-//Helper function
-async function addGoodsFromPreLoginToMain(userId, pre_login_shoppingcartId) {
-    const pre_login_shoppingcart = await ShoppingCart.findOne({"cart_identifier": pre_login_shoppingcartId});
-    let toBeDeletedIds = [];
-
-    for (let i = 0; i < pre_login_shoppingcart.goods.length; i++) {
-        const cartgood = await CartGood.findById(pre_login_shoppingcart.goods[i]);
-        shoppingcartResolver.addToCart({
-            cart_identifier: userId,
-            good_id: cartgood.good,
-            quantity: cartgood.quantity
-        });
-        toBeDeletedIds.push(cartgood._id);
-    }
-
-    CartGood.deleteMany({id: {$in: toBeDeletedIds}}, function (err) {
-    });
-    ShoppingCart.findByIdAndDelete(pre_login_shoppingcart._id);
-    return await ShoppingCart.findOne({"cart_identifier": userId});
-}
-
-//Helper function
-async function UpdateShoppingCart(userId, old_cart_id) {
-    const pre_login_shoppingcart = await ShoppingCart.findOne({"cart_identifier": old_cart_id});
-    const main_shoppingcart = await ShoppingCart.findOne({"cart_identifier": userId});
-
-    const preLoginCartIsPresent = pre_login_shoppingcart !== null;
-    const mainShoppingCartIsPresent = main_shoppingcart !== null;
-    const preLoginCartHasGoods = (preLoginCartIsPresent) ? pre_login_shoppingcart.goods.length > 0 : false;
-
-
-    if (!preLoginCartIsPresent && !mainShoppingCartIsPresent) {
-        return true;
-    } else if (!preLoginCartHasGoods && mainShoppingCartIsPresent) {
-        return main_shoppingcart;
-    } else if (preLoginCartHasGoods) {
-        return await addGoodsFromPreLoginToMain(userId, old_cart_id);
-    }
-}
 
 module.exports = {
     createUser: async args => {
@@ -375,18 +337,17 @@ module.exports = {
             }
         }, {upsert: true}, function (err) {
         });
-        console.info("Regular user #" + user._id + " logged in");
 
 
         if (old_cart_id) {
-            //user had shoppingcart before
-            //user had goods in oled
-            const result = await UpdateShoppingCart(user._id, old_cart_id);
-            if (!result) {
+            const result = await shoppingCartService.mergePreLoginShoppingCartWithExcistingShoppingCart(user._id, old_cart_id);
+            if (result == null) {
                 console.error("Shopping cart was not properly created for user #", user._id);
-                return Error("Existing shoppingcart could not be merged");
+                return new Error("Existing shopping cart could not be merged");
             }
+            console.log("Merged two shopping carts while user #"+user.id+" attempted to log in.")
         }
+        console.info("Regular user #" + user._id + " logged in");
         const current_time = new Date().getTime();
         const expires_in = (user.signupMethod === "Facebook") ? 6042000 : 3600000; //expires in 100 minutes or 60 minutes
         const expiresIn_as_String = (current_time + expires_in).toString();
@@ -559,4 +520,4 @@ module.exports = {
                 return Error("We have troble reseting your password");
         }
     }
-}
+};

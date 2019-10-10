@@ -10,16 +10,11 @@ const category_schemas = require('../category/models/generalCategory');
 const GeneralCategory = category_schemas.GeneralCategory;
 
 const cart_schemas = require('./models/shoppingcart');
-const ShoppingCart = cart_schemas.ShoppingCart;
 const ForexRate = cart_schemas.ForexRate;
 
-
-const user_schemas = require('../user/models/user');
-const RegularUser = user_schemas.RegularUser;
-
-
-const jwt = require('jsonwebtoken');
 const axios = require('axios');
+
+const shoppingCartService = require('./services/shoppingCartService.jsx');
 
 
 async function getForexData(sourceCurrency) {
@@ -48,7 +43,7 @@ async function convertToEUR(currency, price) {
         const result = await newForex.save();
         return Math.round(100 * (result.rate * price));
     }
-    const oldestAcceptableUpdateTime = new Date( Date.now() - 1000 * 60*1.8 );//1.8 minutes
+    const oldestAcceptableUpdateTime = new Date(Date.now() - 1000 * 60 * 1.8);//1.8 minutes
     if (parseInt(currentRate.lastUpdateTime_UTC) < oldestAcceptableUpdateTime) {
         await ForexRate.update(
             {_id: currentRate._id},
@@ -60,126 +55,49 @@ async function convertToEUR(currency, price) {
             }
         );
     }
-    return Math.floor(Math.round(100 * (currentRate.rate * price)))/100;
-}
-
-//Helper functions
-async function findOrCreateShoppingcart(cart_identifier) {
-    //1. Find the cart idThe cart identifier can be either jwt or a String with a length of 256
-    let cart_id;
-    if (cart_identifier.length === 256) {
-        cart_id = cart_identifier;
-    } else {
-        const KEY = process.env.PERSONAL_JWT_KEY;
-        let decoded = jwt.decode(cart_identifier, KEY);
-        //Check if the user_id is valid
-        const user = await RegularUser.findById(decoded.userId);
-        if (!user) throw new Error('JWT was not decoded properly');
-        cart_id = decoded.userId;
-    }
-    let shoppingcart = await ShoppingCart.findOne({cart_identifier: cart_id});
-    //2. If shopping cart does not excist a new one will be created
-    if (!shoppingcart) {
-        const new_shoppingcart = new ShoppingCart({
-            cart_identifier: cart_id,
-            goods: [],
-            success_id: Math.random().toString(36).substr(2, 9)
-        });
-        return await new_shoppingcart.save();
-    }
-    return shoppingcart;
-}
-
-async function addNewCartGoodToShoppingCart(cartgood, good, quantity, shoppingcart) {
-    //1. Has the new cartgood already been saved?
-    if (!cartgood) {
-        const new_shoppingCartGood = new CartGood({
-            price_per_one_item: good.current_price,
-            quantity: quantity,
-            good: good,
-            shoppingcart: shoppingcart
-        });
-        cartgood = await new_shoppingCartGood.save();
-    }
-    //Push the cartgood into the array
-    shoppingcart.goods.push(cartgood);
-    return await shoppingcart.save();
+    return Math.floor(Math.round(100 * (currentRate.rate * price))) / 100;
 }
 
 
 module.exports = {
     addToCart: async ({cart_identifier, good_id, quantity}) => {
-        /*
-        Quantity can be both positive or negative. If it's positive the good will be added to the cart, if it's negative goods will be removed from the cart
-         */
         const good = await Good.findById(good_id);
-        if (!good) throw new Error('We do not have a good with id:' + good_id);
-
-        let shoppingcart = await findOrCreateShoppingcart(cart_identifier);
-        //  console.log("add to cart shoppingcart" + shoppingcart);
-        //2. Is this shoppingcart empty?
-        if (shoppingcart.goods.length === 0) {
-            const new_shoppingCartGood = new CartGood({
-                price_per_one_item: good.current_price,
-                quantity: quantity,
-                good: good,
-                shoppingcart: shoppingcart
-            });
-            const new_saved_cartgood = await new_shoppingCartGood.save();
-            await addNewCartGoodToShoppingCart(new_saved_cartgood, good, quantity, shoppingcart);
-        } else {
-            const cartgood = await CartGood.findOne({
-                shoppingcart: shoppingcart,
-                good: good
-            });
-            if (cartgood) {
-                const new_quantity = Math.min(cartgood.quantity + quantity, good.quantity - good.booked);
-                if (new_quantity === 0) {
-                    await ShoppingCart.update(
-                        {_id: shoppingcart._id},
-                        {$pull: {goods: cartgood._id}}
-                    );
-                    await CartGood.remove(
-                        {_id: cartgood._id}
-                    );
-                } else {
-                    await CartGood.update(
-                        {_id: cartgood._id},
-                        {$set: {"quantity": new_quantity}}
-                    )
-                }
-            } else {
-                await addNewCartGoodToShoppingCart(cartgood, good, quantity, shoppingcart);
-            }
+        if (!good) {
+            return new Error('We do not have a good with id:' + good_id);
         }
-        console.log("Good # " + good._id + "was added to shoppingcart #" + shoppingcart._id);
-
-        //Final step: return the shoppingcart
+        const shoppingcart = await shoppingCartService.addToCart(cart_identifier, good, quantity);
+        if (quantity > 0){
+            console.log("Good # " + good._id + "was added to shoppingcart #" + shoppingcart._id);
+        }
+        else if (quantity < 0){
+            console.log("Good # " + good._id + "was removed from the shoppingcart #" + shoppingcart._id);
+        }
         return transformShoppingCart(shoppingcart);
     },
     individualCart: async ({jwt_token}) => {
-        const shoppingcart = await findOrCreateShoppingcart(jwt_token);
+        const shoppingcart = await shoppingCartService.findExistingShoppingCartByJWTorCreateNew(jwt_token);
         return transformShoppingCart(shoppingcart);
     },
     numberOfGoodsInCartAndSubtotalAndTax: async ({jwt_token}) => {
-        //1. Find the shoppingcart
-        const shoppingcart = await findOrCreateShoppingcart(jwt_token);
+        const shoppingcart = await shoppingCartService.findExistingShoppingCartByJWT(jwt_token);
         let nr = 0.0;
         let sum = 0.0;
         let tax = 0.0;
 
-        for (let i = 0; i < shoppingcart.goods.length; i++) {
-            const cartgood = await CartGood.findById(shoppingcart.goods[i]);
-            const good = await Good.findById(cartgood.good);
-            const category = await GeneralCategory.findById(good.general_category);
-            nr += cartgood.quantity;
-            const currentSum = await convertToEUR(good.currency, cartgood.price_per_one_item*(1+category.tax)) * cartgood.quantity;
-            const currentSumWithOutTax = Math.round(100 * (currentSum/(1+category.tax))) / 100;
-            sum += currentSumWithOutTax;
-            tax += currentSum - currentSumWithOutTax;
+        if (shoppingcart !== null) {
+            for (let i = 0; i < shoppingcart.goods.length; i++) {
+                const cartgood = await CartGood.findById(shoppingcart.goods[i]);
+                const good = await Good.findById(cartgood.good);
+                const category = await GeneralCategory.findById(good.general_category);
+                nr += cartgood.quantity;
+                const currentSum = await convertToEUR(good.currency, cartgood.price_per_one_item * (1 + category.tax)) * cartgood.quantity;
+                const currentSumWithOutTax = Math.round(100 * (currentSum / (1 + category.tax))) / 100;
+                sum += currentSumWithOutTax;
+                tax += currentSum - currentSumWithOutTax;
+            }
+            sum = (Math.round(sum * 100) / 100);
+            tax = (Math.round(tax * 100) / 100);
         }
-        sum = (Math.round(sum * 100) / 100);
-        tax = (Math.round(tax * 100) / 100);
         return [nr, sum, tax];
     }
 };
