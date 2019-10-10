@@ -144,8 +144,6 @@ module.exports = {
         });
         console.log(sku);
          */
-        //Add product to Algolia
-        //TODO: custom adributes
         const algoliaGood = [{
             _id: new_good._id,
             title: new_good.title,
@@ -156,13 +154,12 @@ module.exports = {
             main_image_cloudinary_secure_url: new_good.main_image_cloudinary_secure_url,
             currency: new_good.currency,
             seller_displayname: seller.displayname,
+            height_mm: args.goodInput.height_mm,
+            length_mm: args.goodInput.length_mm,
+            width_mm: args.goodInput.width_mm,
+            weight_g: args.goodInput.weight_g,
         }];
 
-        /*
-          const custom_attribute_names = Array(args.goodInput.custom_attribute_1_name, args.goodInput.custom_attribute_2_name, args.goodInput.custom_attribute_3_name, args.goodInput.custom_attribute_4_name, args.goodInput.custom_attribute_5_name);
-        const custom_attribute_values = Array(args.goodInput.custom_attribute_1_value, args.goodInput.custom_attribute_2_value, args.goodInput.custom_attribute_3_value, args.goodInput.custom_attribute_4_value, args.goodInput.custom_attribute_5_value);
-
-         */
         for (let i = 0; i < custom_attribute_names.length ; i++) {
             algoliaGood[custom_attribute_names[i]] = custom_attribute_values[i];
         }
