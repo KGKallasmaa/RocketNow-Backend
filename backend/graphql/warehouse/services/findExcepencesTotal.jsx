@@ -1,5 +1,4 @@
 require('dotenv').config();
-
 //Constants
 const monthDictionary = {
     "1": "Jan ",
@@ -15,13 +14,62 @@ const monthDictionary = {
     "11": "Nov ",
     "12": "Dec ",
 };
+const axios = require('axios');
+
+const cart_schemas = require('../../shoppingcart/models/shoppingcart');
+const ForexRate = cart_schemas.ForexRate;
+
+const good_schemas = require('../../good/models/good');
+const OrderGood = good_schemas.OrderGood;
+
+async function getForexData(sourceCurrency) {
+    const KEY = sourceCurrency + "_EUR";
+    const URL = "https://free.currconv.com/api/v7/convert?q=" + KEY + "&compact=ultra&apiKey=" + process.env.FREE_FOREX_API_KEY;
+    return await axios.get(URL).then(response => {
+            console.log("Forex rate for " + sourceCurrency + "/EUR was updated ");
+            return response.data[KEY];
+        }
+    ).catch(error => {
+        return Error("Error accessing Forex data " + error)
+    });
+}
 
 const findPartialOrdersRevenue = async function findPartialOrdersRevenue(partialOrders) {
     let sum = 0;
     for (let i = 0; i < partialOrders.length; i++) {
-        sum += partialOrders[i].partial_subtotal;
+        const element = partialOrders[i];
+        for (let j = 0; j < element.order_items.length; j++) {
+            const orderGood = await OrderGood.findById(element.order_items[j]);
+            sum += await convertToEUR(orderGood.currency,orderGood.price_per_one_item)*orderGood.quantity;
+        }
     }
-    return sum;
+    return Math.round(sum * 100) / 100;
+};
+
+const convertToEUR = async function convertToEUR(currency, price) {
+    if (currency === "EUR") return price;
+    const currentRate = await ForexRate.findOne({source: currency, target: "EUR"});
+    if (!currentRate) {
+        const newForex = new ForexRate({
+            source: currency,
+            rate: Number(await getForexData(currency))
+        });
+        const result = await newForex.save();
+        return Math.round(100 * (result.rate * price));
+    }
+    const oldestAcceptableUpdateTime = new Date( Date.now() - 1000 * 60*1.8 );//1.8 minutes
+    if (parseInt(currentRate.lastUpdateTime_UTC) < oldestAcceptableUpdateTime) {
+        await ForexRate.update(
+            {_id: currentRate._id},
+            {
+                $set: {
+                    "rate": await getForexData(currency),
+                    "lastUpdateTime_UTC": new Date().getTime()
+                }
+            }
+        );
+    }
+    return Math.floor(Math.round(100 * (currentRate.rate * price)))/100;
 };
 
 const findAllExpenses = async function findPartialOrdersRevenue(orders, partialOrders) {
@@ -43,7 +91,7 @@ const findAllExpenses = async function findPartialOrdersRevenue(orders, partialO
         const rocketNowFee = (orders[i].subtotal - orders[i].tax_cost) * 0.1; // RocketNow fee is 10%
         expenses += rocketNowFee;
     }
-    return expenses;
+    return Math.round(expenses * 100) / 100;
 };
 
 const findPartialOrdersRevenueGroupByMonth = async function findPartialOrdersRevenue(partialOrders) {
@@ -77,7 +125,7 @@ const findPartialOrdersRevenueGroupByMonth = async function findPartialOrdersRev
         for (let j = 0; j < suitablePartialOrders.length; j++) {
             sum += suitablePartialOrders[j].partial_subtotal
         }
-        monthAndRevenue[monthAsString] = sum;
+        monthAndRevenue[monthAsString] = Math.round(sum * 100) / 100;
     }
     return monthAndRevenue;
 };
@@ -116,5 +164,6 @@ module.exports = {
     'findPartialOrdersRevenue': findPartialOrdersRevenue,
     'findAllExpenses': findAllExpenses,
     'findPartialOrdersRevenueGroupByMonth': findPartialOrdersRevenueGroupByMonth,
-    'findPartialOrdersCountGroupByMonth': findPartialOrdersCountGroupByMonth
+    'findPartialOrdersCountGroupByMonth': findPartialOrdersCountGroupByMonth,
+    'convertToEUR':convertToEUR
 };

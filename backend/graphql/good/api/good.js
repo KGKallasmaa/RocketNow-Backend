@@ -1,14 +1,14 @@
 require('dotenv').config();
-const {transformGood} = require('../enchancer');
+const {transformGood} = require('../../enchancer');
 
-const good_schemas = require('./models/good');
+const good_schemas = require('../models/good');
 const Good = good_schemas.Good;
 
-const user_schemas = require('../user/models/user');
+const user_schemas = require('../../user/models/user');
 const BusinessUser = user_schemas.BusinessUser;
 const RegularUser = user_schemas.RegularUser;
 
-const category_schemas = require('../category/models/generalCategory');
+const category_schemas = require('../../category/models/generalCategory');
 const GeneralCategory = category_schemas.GeneralCategory;
 
 const jwt = require('jsonwebtoken');
