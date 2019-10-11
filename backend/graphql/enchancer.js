@@ -2,6 +2,7 @@ const user_schemas = require('./user/models/user');
 const good_schemas = require('./good/models/good');
 const address_schemas = require('./shipping/models/address');
 const shipping_schemas = require('./shipping/models/shipping');
+const order_schemas = require('./order/models/order');
 
 const category_schemas = require('./category/models/generalCategory');
 const GeneralCategory = category_schemas.GeneralCategory;
@@ -73,7 +74,7 @@ const transformOrder = async order => {
 };
 const transformShippingAddress = async shippingAddressID => {
     const address = await address_schemas.OrderAddress.findById(shippingAddressID);
-    if (address.shippingMethod ==='AddressDelivery') {
+    if (address.shippingMethod === 'AddressDelivery') {
         return {
             ...address._doc,
             parcelDeliveryLocation: null,
@@ -98,11 +99,12 @@ const transformPartialOrders = async partialOrders => {
     return partialOrders.map(partialOrder => {
         return transformPartialOrder(partialOrder);
     });
-}
+};
 const transformPartialOrder = async partialOrder => {
     return {
         ...partialOrder._doc,
         _id: partialOrder.id,
+        order_items: order_items.bind(this, partialOrder.order_items)
     };
 };
 
@@ -120,17 +122,13 @@ const transformOrderGood = async ordergoodID => {
 };
 
 const transformOrderBusinessUsers = async sellers => {
-    try {
-        if (sellers.length === 0) {
-            throw new Error("Every order needs a business user")
-        }
-        return sellers.map(seller => {
-            return businessuser(seller)
-        });
-    } catch (err) {
-        throw err;
+    if (sellers.length === 0) {
+        return new Error("Every order needs a business user")
     }
-}
+    return sellers.map(seller => {
+        return businessuser(seller)
+    });
+};
 
 /*
 Shopping cart
@@ -188,6 +186,15 @@ const transformGoodForCart = async good => {
     }
 };
 
+const transformEnhancedPartialOrder = async (enhancedPartialOrder)=> {
+    const partialOrder = await order_schemas.PartialOrder.findById(enhancedPartialOrder.partialOrder);
+    return {
+        ...enhancedPartialOrder._doc,
+        partialOrder:transformPartialOrder.bind(this,partialOrder),
+        shippingAddress:transformShippingAddress.bind(this,enhancedPartialOrder.shippingAddress)
+    };
+};
+
 exports.transformGood = transformGood;
 exports.transformGeneralCategory = transformGeneralCategory;
 exports.transformShoppingCart = transformShoppingCart;
@@ -195,3 +202,4 @@ exports.user = user;
 exports.businessuser = businessuser;
 exports.transformOrder = transformOrder;
 exports.transformPartialOrder = transformPartialOrder;
+exports.transformEnhancedPartialOrder =transformEnhancedPartialOrder;

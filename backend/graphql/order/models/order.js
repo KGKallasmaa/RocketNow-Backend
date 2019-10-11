@@ -4,27 +4,19 @@ const Schema = mongoose.Schema;
 
 const orderSchema = new Schema({
     received_timestamp_UTC: {
-        type: String,
+        type: Date,
         required: true
     },
     processing_start_timestamp_UTC: {
-        type: String,
+        type: Date,
         required: false
     },
     processing_end_timestamp_UTC: {
-        type: String,
-        required: false
-    },
-    shipping_start_timestamp_UTC: {
-        type: String,
+        type: Date,
         required: false
     },
     shipping_end_timestamp_UTC: {
-        type: String,
-        required: false
-    },
-    delivered_timestamp_UTC: {
-        type: String,
+        type: Date,
         required: false
     },
     status: {
@@ -60,7 +52,7 @@ const orderSchema = new Schema({
         ref: 'OrderGood'
     }],
     deliveryEstimate_UTC: {
-        type: String,
+        type: Date,
         required: false
     },
     shippingAddress: {
@@ -70,30 +62,33 @@ const orderSchema = new Schema({
     }
 });
 
+const enhancedPartialOrder = new Schema({
+    partialOrder: [{
+        type: Schema.Types.ObjectId,
+        ref: 'PartialOrder'
+    }],
+    shippingAddress: [{
+        type: Schema.Types.ObjectId,
+        ref: 'OrderAddress'
+    }],
+});
+
 
 const partialorderSchema = new Schema({
-    new_timestamp_UTC: {
-        type: String,
+    received_timestamp_UTC: {
+        type: Date,
         required: true
     },
-    received_timestamp_UTC: {
-        type: String,
-        required: false
-    },
     processing_start_timestamp_UTC: {
-        type: String,
+        type: Date,
         required: false
     },
     processing_end_timestamp_UTC: {
-        type: String,
+        type: Date,
         required: false
     },
-    shipping_start_timestamp_UTC: {
-        type: String,
-        required: false
-    },
-    shipping_end_timestamp_UTC: {
-        type: String,
+    shipped_timestamp_UTC: {
+        type: Date,
         required: false
     },
     partial_subtotal: {
@@ -125,5 +120,6 @@ const partialorderSchema = new Schema({
 
 module.exports = {
     'Order': mongoose.model('Order', orderSchema),
-    'PartialOrder': mongoose.model('PartialOrder', partialorderSchema)
+    'PartialOrder': mongoose.model('PartialOrder', partialorderSchema),
+    'EnhancedPartialOrder': mongoose.model('EnhancedPartialOrder', enhancedPartialOrder)
 };

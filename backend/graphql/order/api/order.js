@@ -1,34 +1,39 @@
 require('dotenv').config();
 
-const order_schema = require('./models/order');
+const order_schema = require('../models/order');
 const Order = order_schema.Order;
 const PartialOrder = order_schema.PartialOrder;
 
-const user_schemas = require('../user/models/user');
+const user_schemas = require('../../user/models/user');
 const RegularUser = user_schemas.RegularUser;
 const BusinessUser = user_schemas.BusinessUser;
 
-const category_schemas = require('../category/models/generalCategory');
+const category_schemas = require('../../category/models/generalCategory');
 const GeneralCategory = category_schemas.GeneralCategory;
 
-const cart_schemas = require('../shoppingcart/models/shoppingcart');
+const cart_schemas = require('../../shoppingcart/models/shoppingcart');
 const ShoppingCart = cart_schemas.ShoppingCart;
 const ForexRate = cart_schemas.ForexRate;
 
-const shipping_schema = require('../shipping/models/shipping');
+const shipping_schema = require('../../shipping/models/shipping');
 const ParcelDeliveryLocation = shipping_schema.ParcelDeliveryLocation;
 
-const address_schema = require('../shipping/models/address');
+const address_schema = require('../../shipping/models/address');
 const OrderAddress = address_schema.OrderAddress;
 
-const good_schemas = require('../good/models/good');
+const good_schemas = require('../../good/models/good');
 const Good = good_schemas.Good;
 const CartGood = good_schemas.CartGood;
 const OrderGood = good_schemas.OrderGood;
 
 const axios = require('axios');
-const {transformOrder} = require('../enchancer');
+const {transformOrder} = require('../../enchancer');
 
+const findUserService = require('../../user/services/findUser.jsx');
+const findOrderService = require('../services/findOrder.jsx');
+const updateOrderStatus = require('../services/updateOrderStatus.jsx');
+
+const {transformPartialOrderUpdate} = require('../../enchancer');
 
 //TODO: remove
 async function test() {
@@ -192,7 +197,7 @@ async function FormatShippingItem(
         case ("AddressDelivery"):
             image = "https://res.cloudinary.com/dl7zea2jd/image/upload/v1565514682/shipping_pictures/AddressDeliveryLogo_lpqgpp.png";
             const name = ShippingName + " \n";
-            description ="Address delivery to "+ name;
+            description = "Address delivery to " + name;
             break;
         case ("ParcelDelivery"):
             const ShippingProvider = await ParcelDeliveryLocation.findById(ParcelDeliveryLocationId);
@@ -264,7 +269,7 @@ async function getPartialOrders(BusinessUser_Cartgoods,
 
             let new_OrderGood = await OrderGood.findOne({
                 "title": good.title,
-                "dateCreated_UTC":current_timestamp,
+                "dateCreated_UTC": current_timestamp,
                 "price_per_one_item": cartgood.price_per_one_item,
                 "main_image_cloudinary_secure_url": good.main_image_cloudinary_secure_url,
                 "quantity": cartgood.quantity,
@@ -273,7 +278,7 @@ async function getPartialOrders(BusinessUser_Cartgoods,
             if (!new_OrderGood) {
                 new_OrderGood = new OrderGood({
                     title: good.title,
-                    dateCreated_UTC:current_timestamp,
+                    dateCreated_UTC: current_timestamp,
                     price_per_one_item: cartgood.price_per_one_item,
                     main_image_cloudinary_secure_url: good.main_image_cloudinary_secure_url,
                     quantity: cartgood.quantity,
@@ -290,7 +295,7 @@ async function getPartialOrders(BusinessUser_Cartgoods,
 
 
         const new_partialOrder = new PartialOrder({
-            new_timestamp_UTC: current_timestamp,
+            received_timestamp_UTC: current_timestamp,
             partial_subtotal: partial_subtotal,
             partial_shipping_cost: partial_shipping_cost,
             partial_tax_cost: partial_tax_cost,
@@ -419,7 +424,7 @@ module.exports = {
 
         const SuccessUrl = process.env.CLIENT_URL + "/success/" + UNICUE_ORDER_ID;
         const CancelUrl = process.env.CLIENT_URL + "/cancel/" + UNICUE_ORDER_ID;
-        
+
         const session = await stripe.checkout.sessions.create({
             customer_email: regular_user.email,
             payment_method_types: ['card'],
@@ -437,7 +442,7 @@ module.exports = {
         /*
         User made a successful order. We have recived the payment. Now it's time to make an order
         Order statuses : {RECEIVED","PROCESSING","PROCESSED","SHIPPED","DELIVERED"}
-        PartialOrder statuses : {"NEW","RECEIVED","PROCESSING","PROCESSED","SHIPPED"}
+        PartialOrder statuses : {"RECEIVED","PROCESSING","PROCESSED","SHIPPED"}
          */
         const jwt_token = args.orderInput.jwt_token;
         const success_id = args.orderInput.success_id;
@@ -453,7 +458,7 @@ module.exports = {
         const order_tax_cost = shoppingcart.tax_cost;
         const order_subtotal = order_total - order_shipping_cost - order_tax_cost;
         const order_status = "RECEIVED";
-        const partial_order_status = "NEW";
+        const partial_order_status = "RECEIVED";
         const current_timestamp = new Date().getTime();
 
         //2. Create a partial Orders (for the Business clients)
@@ -509,22 +514,36 @@ module.exports = {
 
         return transformOrder(new_Order);
     },
-    individualOrder: async ({jwt_token,order_id}) => {
+    individualOrder: async ({jwt_token, order_id}) => {
         const decoded = jwt.decode(jwt_token, process.env.PERSONAL_JWT_KEY);
         if (!decoded) return Error('JWT was not decoded properly');
 
         const user = await RegularUser.findById(decoded.userId);
         if (!user) return Error('User does not exist');
         let orders;
-        if (order_id){
-            orders = await Order.find({_id:order_id});
-        }
-        else {
+        if (order_id) {
+            orders = await Order.find({_id: order_id});
+        } else {
             orders = await Order.find({customer: user._id}).sort([['received_timestamp_UTC', 'descending']]);
         }
 
         return orders.map(order => {
             return transformOrder(order);
         });
+    },
+    updatePartialOrderStatus: async ({jwt_token, partialOrderId, newStatus}) => {
+        const businessUser = await findUserService.findBusinessUserByJWT(jwt_token);
+        if (businessUser.id === null) {
+            return new Error("Business user was not found.")
+        }
+        const current_timestamp = new Date();
+        const partialOrder = await findOrderService.findPartialOrderById(partialOrderId,current_timestamp);
+        if (partialOrder === null) {
+            return new Error("PartialOrder #" + partialOrderId + " was not found");
+        }
+        const updatedPartialOrder = await updateOrderStatus.updatePartialOrderStatus(partialOrder, newStatus,current_timestamp);
+        const order = await findOrderService.findOrderByPartialOrder(updatedPartialOrder);
+        await updateOrderStatus.updateOrderStatus(order, newStatus);
+        return transformPartialOrderUpdate(partialOrder,order.shippingAddress);
     }
 };

@@ -221,9 +221,7 @@ type Order {
   received_timestamp_UTC:String!
   processing_start_timestamp_UTC:String
   processing_end_timestamp_UTC:String
-  shipping_start_timestamp_UTC:String
-  shipping_end_timestamp_UTC:String
-  delivered_timestamp_UTC:String
+  shipped_timestamp_UTC:String
   status: String!
   customer: User!
   fulfillers:[BusinessUser!]!
@@ -238,17 +236,15 @@ type Order {
 }
 type PartialOrder {
     _id: ID!
-    new_timestamp_UTC:String!
     received_timestamp_UTC:String
     processing_start_timestamp_UTC:String
     processing_end_timestamp_UTC:String
-    shipping_start_timestamp_UTC:String
-    shipping_end_timestamp_UTC:String
+    shipped_timestamp_UTC:String
     partial_subtotal: Float!
     partial_shipping_cost:Float!
     partial_tax_cost:Float!
     partial_order_status:String!
-    fulfiller: BusinessUser
+    fulfiller: BusinessUser!
     order_items:[OrderGood!]!
 }
    
@@ -279,6 +275,13 @@ input OrderInput {
    deliveryEstimate_UTC:String,
    totalCost:Float
 }
+
+type EnhancedPartialOrder {
+    _id: ID!
+    partialOrder:PartialOrder!
+    shippingAddress:OrderAddress!
+}
+
 """
 ##################### Address #####################
 """
@@ -322,13 +325,17 @@ type RootQuery {
     individualGood(nr:Int!,jwt_token:String):Good!
     
     individualPartialOrder(partial_order_id:String!):PartialOrder!
-    partialOrdersNotYetShipped(jwt_token:String!):[PartialOrder!]
+    partialOrdersNotYetShipped(jwt_token:String!):[EnhancedPartialOrder!]
     productsInWarehouse(jwt_token:String!):[Good!]
     thisMonthsRevenue(jwt_token:String!):Float!
     thisYearsRevenue(jwt_token:String!):Float!
     thisMonthsExpenses(jwt_token:String!):Float!
     thisYearsExpenses(jwt_token:String!):Float!
     
+    nrOfOrdersProcessingNotStarted(jwt_token:String!):Int!
+    nrOfInProgressOrders(jwt_token:String!):Int!
+    nrOfNotShippedOrders(jwt_token:String!):Int!
+    unCompletedOrdersValue(jwt_token:String!):Float!
     
     businessUserGoods(nr:Int!,displayname:String): [Good!]
     allGeneralCategories:[GeneralCategory!]!
@@ -355,7 +362,7 @@ type RootMutation {
     addPhysicalGood(goodInput: goodInput): Good!
     addToCart(cart_identifier: String!,good_id: ID!,quantity:Int!): ShoppingCart!
     showCheckout(checkoutInput:OrderInput):StripeCheckout!
-    
+    updatePartialOrderStatus(jwt_token:String!, partialOrderId:ID!,newStatus:String!):PartialOrder!
 }
 
 schema {

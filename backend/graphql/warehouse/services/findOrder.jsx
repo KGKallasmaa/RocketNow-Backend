@@ -6,18 +6,18 @@ const PartialOrder = order_schema.PartialOrder;
 const Order = order_schema.Order;
 
 const findPartialOrdersBetweenDates = async function findPartialOrdersBetweenDates(jwt_token,start,finish){
-    const businessUser = findUserService.findBusinessUserByJWT(jwt_token);
-    return PartialOrder.find({
-        fulfiller: businessUser.id,
-        age: {$gt: start, $lt: finish}
-    });
+    const businessUser = await findUserService.findBusinessUserByJWT(jwt_token);
+    return  await PartialOrder.find({
+       fulfiller: businessUser.id,
+        new_timestamp_UTC: {$gte: start, $lte: finish}
+   });
 };
 
 const findOrdersBetweenDates = async function findOrdersBetweenDates(jwt_token,start,finish){
-    const businessUser = findUserService.findBusinessUserByJWT(jwt_token);
+    const businessUser = await findUserService.findBusinessUserByJWT(jwt_token);
     return Order.find({
         fulfiller: businessUser.id,
-        age: {$gt: start, $lt: finish}
+        received_timestamp_UTC: {$gte: start, $lte: finish}
     });
 };
 
