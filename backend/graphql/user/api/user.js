@@ -23,8 +23,8 @@ const shoppingCartService = require('../../shoppingcart/services/shoppingCartSer
 const emailVerificationService = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: process.env.VERIFICATION_SENDER_EMAIL,
-        pass: process.env.VERIFCIATION_SENDER_PW
+        user: process.env.EMAIL_NAME,
+        pass: process.env.EMAIL_PW
     }
 });
 

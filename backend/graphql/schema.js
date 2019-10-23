@@ -346,6 +346,8 @@ type RootQuery {
     orderGoods(orderInput: finalOrderInput!):Order!
     DeliveryCost(deliverycostInput:OrderInput):Float!
     DeliveryTimeEstimate(deliverytimeEstimateInput:OrderInput):String!
+    
+    receiveContactFormMessage(clientName:String!, clientEmail:String!, subject:String!, clientMessage:String!):Boolean!
 }
 """
 ##################### Root Mutation #####################
