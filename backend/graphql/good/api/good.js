@@ -144,6 +144,7 @@ module.exports = {
             }
         });
         console.log(sku);
+
          */
         const algoliaGood = [{
             _id: new_good._id,
