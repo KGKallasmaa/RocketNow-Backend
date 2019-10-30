@@ -15,7 +15,7 @@ const orderSchema = new Schema({
         type: Date,
         required: false
     },
-    shipping_end_timestamp_UTC: {
+    shipped_timestamp_UTC: {
         type: Date,
         required: false
     },

@@ -1,23 +1,19 @@
 require('dotenv').config();
 
 const nodemailer = require('nodemailer');
-const myEmail = process.env.EMAIL_NAME;
-const myPass = process.env.EMAIL_PW;
-
-
 const emailService = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: myEmail,
-        pass: myPass
+        user:process.env.EMAIL_NAME,
+        pass: process.env.EMAIL_PW
     }
 });
 
 
 const receiveContactEmail = async function receiveContactEmail(clientName, clientEmail, subject, clientMessage) {
     const mailOptions = {
-        from: myEmail,
-        to: myEmail,
+        from: process.env.EMAIL_NAME,
+        to:process.env.EMAIL_NAME,
         subject: subject,
         html: `        <div>
                         ${clientMessage}

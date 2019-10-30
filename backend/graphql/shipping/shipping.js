@@ -138,7 +138,6 @@ async function boxify(cartgoods, method) {
                 if (!good) {
                     throw new Error("Cartgood with good " + cartgoods[i].goods + " dosent exist on db")
                 }
-                ;
                 const proposedName = "BOX" + CurrentBox;
 
                 //1. Size validation
@@ -183,8 +182,7 @@ async function boxify(cartgoods, method) {
 
     return boxes;
 
-};
-
+}
 async function AddressDeliveryShippingCostEstimate(ShippmentCountry, shoppingcart) {
     //TODO: switch to Shippo
     /*
@@ -458,7 +456,7 @@ async function AddressDeliveryShippingCostEstimate(ShippmentCountry, shoppingcar
 
     const boxes = await boxify(cartgoods, "Address");
     if (ShippmentCountry === "Estonia") {
-        for (box in boxes) {
+        for (let box in boxes) {
             const boxWeight = Math.ceil(boxWeightKG(boxes[box]));
             cost += baseFareEstonia_EUR + boxWeight * WeightFeeEstonia_EUR;
         }
@@ -470,7 +468,7 @@ async function AddressDeliveryShippingCostEstimate(ShippmentCountry, shoppingcar
         if (!base || !weight) {
             throw new Error("No country " + ShippmentCountry + " found. Probably grammar mistake")
         }
-        for (box in boxes) {
+        for (let box in boxes) {
             const boxWeight = Math.ceil(boxWeightKG(boxes[box]));
             cost += base + boxWeight * weight;
         }
@@ -594,7 +592,7 @@ async function ParcelDeliveryShippingCostEstimate(ParcelDeliveryLocationId, shop
             }
             break;
         default:
-            console.log("Omniva only supports parcel deliveries in Estonia, Latvia and Lithuanita not in " + Country)
+            console.log("Omniva only supports parcel deliveries in Estonia, Latvia and Lithuanita not in " + Country);
             return -1;
     }
     return cost;
@@ -756,7 +754,7 @@ module.exports = {
             if (currentTimeAsDate.getDay() === 6 || currentTimeAsDate.getDay() ===7) {
                 localTime += (currentTimeAsDate.getDay() === 6) ? 2*ONE_DAY_IN_MS+9*ONE_HOUR_IN_MS : ONE_DAY_IN_MS+9*ONE_HOUR_IN_MS;
                 return localTime+TimezoneOffset_MS-currentTime;
-            };
+            }
             return localTime+TimezoneOffset_MS-currentTime;
         };
         deliveryTime_UTC += getTimeTillNextWorkDay(deliveryTime_UTC);
