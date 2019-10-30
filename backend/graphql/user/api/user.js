@@ -208,7 +208,6 @@ module.exports = {
             if (existingUser.isVerified === true) {
                 return Error('User with that email has already bee verified. Try logging in');
             }
-            ;
             const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
             await RegularUser.update({_id: existingUser._id}, {
                 $set: {
@@ -219,8 +218,6 @@ module.exports = {
             await sendEmail(token, existingUser.email, existingUser._id, "verifyEmail");
             return Error('We sent you another verification email');
         }
-        ;
-
         const hashedPassword = await bcrypt.hash(args.userInput.password, 12);
         const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         user = new RegularUser({
@@ -438,8 +435,6 @@ module.exports = {
             await sendEmail(token, user.email, user._id, "verifyEmail");
             return Error("Your verification code has expired. We sent a new email");
         }
-        ;
-
         await RegularUser.update({email: user.email}, {
             $set: {isVerified: true, isActive: true,}, $unset: {verificationCode: user.verificationCode}
         }, {upsert: true}, function (err) {
@@ -516,7 +511,7 @@ module.exports = {
                 return true;
             }
             default:
-                console.error("Reset method " + mode + " is not supported")
+                console.error("Reset method " + mode + " is not supported");
                 return Error("We have troble reseting your password");
         }
     }

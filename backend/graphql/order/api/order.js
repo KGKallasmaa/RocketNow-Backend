@@ -218,11 +218,14 @@ async function FormatShippingItem(
             console.log("Shipping method " + ShippingMethod + " is not supported.")
     }
 
+    //TODO: make it dynamic
+    const shippingTaxRate = 0.2;
+
     let item = {};
     item["name"] = (ShippingCost === 0) ? "Free shipping" : "Shipping";
     item["images"] = [image];
     item["description"] = description;
-    item["amount"] = await convertToStipeEUR(ShippingCostCurrency, ShippingCost);
+    item["amount"] = await convertToStipeEUR(ShippingCostCurrency, ShippingCost*(1+shippingTaxRate)); //received shippingcost was without taxes
     item["currency"] = 'eur';
     item["quantity"] = 1;
     return item;
@@ -441,7 +444,7 @@ module.exports = {
     orderGoods: async args => {
         /*
         User made a successful order. We have recived the payment. Now it's time to make an order
-        Order statuses : {RECEIVED","PROCESSING","PROCESSED","SHIPPED","DELIVERED"}
+        Order statuses : {RECEIVED","PROCESSING","PROCESSED","SHIPPED"}
         PartialOrder statuses : {"RECEIVED","PROCESSING","PROCESSED","SHIPPED"}
          */
         const jwt_token = args.orderInput.jwt_token;
