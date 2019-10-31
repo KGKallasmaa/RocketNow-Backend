@@ -1,20 +1,20 @@
 require('dotenv').config();
 
-const {transformShoppingCart} = require('../enchancer');
+const {transformShoppingCart} = require('../../enchancer');
 
-const good_schemas = require('../good/models/good');
+const good_schemas = require('../../good/models/good');
 const Good = good_schemas.Good;
 const CartGood = good_schemas.CartGood;
 
-const category_schemas = require('../category/models/generalCategory');
+const category_schemas = require('../../category/models/generalCategory');
 const GeneralCategory = category_schemas.GeneralCategory;
 
-const cart_schemas = require('./models/shoppingcart');
+const cart_schemas = require('../models/shoppingcart');
 const ForexRate = cart_schemas.ForexRate;
 
 const axios = require('axios');
 
-const shoppingCartService = require('./services/shoppingCartService.jsx');
+const shoppingCartService = require('../services/shoppingCartService.jsx');
 
 
 async function getForexData(sourceCurrency) {

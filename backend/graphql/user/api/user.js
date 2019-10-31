@@ -9,15 +9,10 @@ const BusinessUser = user_schemas.BusinessUser;
 const RegularUser = user_schemas.RegularUser;
 
 const cart_schemas = require('../../shoppingcart/models/shoppingcart');
-const ShoppingCart = cart_schemas.ShoppingCart;
-
-const good_schemas = require('../../good/models/good');
-const CartGood = good_schemas.CartGood;
-
-const shoppingcartResolver = require('../../shoppingcart/shoppingcart');
 
 const nodemailer = require('nodemailer');
 const userService = require('../services/findUser.jsx');
+const shippingService = require('../../shipping/services/updateShippingLocationStatus.jsx');
 const shoppingCartService = require('../../shoppingcart/services/shoppingCartService.jsx');
 
 const emailVerificationService = nodemailer.createTransport({
@@ -27,6 +22,7 @@ const emailVerificationService = nodemailer.createTransport({
         pass: process.env.EMAIL_PW
     }
 });
+
 
 //Helper function
 async function sendEmail(token, toEmail, userId, type) {
@@ -514,5 +510,12 @@ module.exports = {
                 console.error("Reset method " + mode + " is not supported");
                 return Error("We have troble reseting your password");
         }
-    }
+    },
+    makeAddressDefault:async ({jwt_token, location_id}) => {
+        const user = await userService.findRegularUserByJWT(jwt_token);
+        return await shippingService.makeShippingAddressDefault(user._id, location_id);
+    },
+    makeAddressNotActive:async ({jwt_token, location_id}) => {
+        return await shippingService.makeShippingLocationNotActive(location_id);
+    },
 };

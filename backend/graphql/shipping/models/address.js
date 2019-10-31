@@ -17,6 +17,11 @@ const OrderAddressSchema = new Schema({
         required:true,
         default: true
     },
+    isDefault:{
+        type:Boolean,
+        required:true,
+        default:false
+    },
     addressOne: {
         type: String,
         required: false
