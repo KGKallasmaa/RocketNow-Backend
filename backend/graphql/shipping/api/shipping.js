@@ -1,23 +1,23 @@
 require('dotenv').config();
 
-const cart_schemas = require('../shoppingcart/models/shoppingcart');
+const cart_schemas = require('../../shoppingcart/models/shoppingcart');
 const ShoppingCart = cart_schemas.ShoppingCart;
 
-const shipping_schema = require('./models/shipping');
+const shipping_schema = require('../models/shipping');
 const ParcelDeliveryLocation = shipping_schema.ParcelDeliveryLocation;
 
-const address_schema = require('./models/address');
+const address_schema = require('../models/address');
 const OrderAdress = address_schema.OrderAddress;
 
-const order_schema = require('../order/models/order');
+const order_schema = require('../../order/models/order');
 const Order = order_schema.Order;
 
-const good_schemas = require('../good/models/good');
+const good_schemas = require('../../good/models/good');
 const Good = good_schemas.Good;
 const CartGood = good_schemas.CartGood;
 
 
-const user_schemas = require('../user/models/user');
+const user_schemas = require('../../user/models/user');
 const BusinessUser = user_schemas.BusinessUser;
 const RegularUser = user_schemas.RegularUser;
 
@@ -783,5 +783,4 @@ module.exports = {
         const result = await new_ParcelDeliveryLocation.save();
         return {...result._doc};
     },
-}
-;
+};
