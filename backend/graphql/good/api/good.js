@@ -16,8 +16,8 @@ const jwt = require('jsonwebtoken');
 
 
 const stripe = require('stripe')(process.env.STRIPE_API_SECRET);
-const client = require('algoliasearch')(process.env.ALGOLIA_API_KEY,process.env.ALGOLIA_ADMIN_KEY);
 
+const client = require('algoliasearch')(process.env.ALGOLIA_API_KEY, process.env.ALGOLIA_ADMIN_KEY);
 const index = client.initIndex('product');
 module.exports = {
     addPhysicalGood: async args => {
