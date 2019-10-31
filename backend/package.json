@@ -3,18 +3,19 @@
   "version": "1.0.0",
   "description": "The backend for the e-commerce site RocketNow",
   "main": "app.js",
+  "private": true,
   "scripts": {
     "start": "node app.js",
     "develop": "nodemon app.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/KGKallasmaa/RocketNow-BackEnd.git"
+    "url": "https://github.com/KGKallasmaa/RocketNow-BackEnd.git"
   },
   "author": "Karl-Gustav Kallasmaa",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/KGKallasmaa/RocketNow-BackEnd/issues"
+    "url": "https://rocketnow.eu"
   },
   "homepage": "https://github.com/KGKallasmaa/RocketNow-BackEnd#readme",
   "dependencies": {
@@ -27,7 +28,7 @@
     "country-list": "^2.1.1",
     "country-reverse-geocoding": "^0.2.2",
     "crypto": "^1.0.1",
-    "dotenv": "^8.0.0",
+    "dotenv": "^8.2.0",
     "express": "^4.16.4",
     "express-graphql": "^0.7.1",
     "graphql": "^14.0.0",
@@ -35,7 +36,7 @@
     "jsonwebtoken": "^8.5.0",
     "jwt-decode": "^2.2.0",
     "jwt-simple": "^0.5.5",
-    "mongoose": "^5.5.2",
+    "mongoose": "^5.7.7",
     "multer": "^1.4.1",
     "multer-storage-cloudinary": "^2.2.1",
     "nodemailer": "^6.3.0",

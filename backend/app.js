@@ -68,7 +68,7 @@ else {
         next(err)
     });
 
-    connectToDatabase()
+    connectToDatabase();
     function connectToDatabase (){
         mongoose.connect(
                 `mongodb+srv://${process.env.MONGO_USER}:${
