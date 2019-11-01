@@ -359,7 +359,7 @@ type RootMutation {
     verifyEmail(token:String):AuthData!
     resetPassword(email:String,password:String,mode:String!,token:String):Boolean!
     makeAddressDefault(jwt_token:String!,location_id:ID!):Boolean!
-    makeAddressNotActive(location_id:ID!):Boolean!
+    makeAddressNotActive(jwt_token:String!,location_id:ID!):Boolean!
     
     
     addParcelDeliveryLocation(provider:String!,name:String!,country:String!,x_coordinate:Float!,y_coordinate:Float!):ParcelDeliveryLocation!
@@ -369,8 +369,6 @@ type RootMutation {
     addToCart(cart_identifier: String!,good_id: ID!,quantity:Int!): ShoppingCart!
     showCheckout(checkoutInput:OrderInput):StripeCheckout!
     updatePartialOrderStatus(jwt_token:String!, partialOrderId:ID!,newStatus:String!):PartialOrder!
-    
-
 }
 
 schema {

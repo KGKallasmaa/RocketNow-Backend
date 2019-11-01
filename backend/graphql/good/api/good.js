@@ -1,5 +1,4 @@
-require('dotenv').config({path: __dirname +'/config/.env'});
-
+require('dotenv').config();
 
 const {transformGood} = require('../../enchancer');
 
@@ -17,8 +16,8 @@ const jwt = require('jsonwebtoken');
 
 const stripe = require('stripe')(process.env.STRIPE_API_SECRET);
 
-const client = require('algoliasearch')(process.env.ALGOLIA_API_KEY, process.env.ALGOLIA_ADMIN_KEY);
-const index = client.initIndex('product');
+const algoliaService = require('../../search/services/algoliaService.jsx');
+
 module.exports = {
     addPhysicalGood: async args => {
 
@@ -91,7 +90,7 @@ module.exports = {
         if (custom_attribute_names.length === custom_attribute_values.length && (custom_attribute_values.length !== 0 && custom_attribute_names !== 0)) {
             new_good.custom_attribute_values = filtered_custom_attribute_values;
             new_good.custom_attribute_names = filtered_custom_attribute_names;
-        }
+        };
 
         const result = await new_good.save();
 
@@ -100,7 +99,7 @@ module.exports = {
         for (let index = 0; index < args.goodInput.other_images_cloudinary_secure_url.length; index++) {
             const element = args.goodInput.other_images_cloudinary_secure_url[index];
             image_array.push(element);
-        }
+        };
 
         //Add product to Stripes database
         // const formated_title = new_good.title.split(' ').join('%');
@@ -145,30 +144,12 @@ module.exports = {
         console.log(sku);
 
          */
-        const algoliaGood = [{
-            _id: new_good._id,
-            title: new_good.title,
-            description: new_good.description,
-            quantity: new_good.quantity,
-            current_price: new_good.current_price,
-            general_category: general_category.name,
-            main_image_cloudinary_secure_url: new_good.main_image_cloudinary_secure_url,
-            currency: new_good.currency,
-            seller_displayname: seller.displayname,
-            height_mm: args.goodInput.height_mm,
-            length_mm: args.goodInput.length_mm,
-            width_mm: args.goodInput.width_mm,
-            weight_g: args.goodInput.weight_g,
-        }];
+        //Add items to Algolia
+        const addGoodsToAlgolia = await algoliaService.addNewGoodToAlgolia(new_good,seller,args.goodInput.height_mm,args.goodInput.length_mm,args.goodInput.width_mm,args.goodInput.weight_g,custom_attribute_names,custom_attribute_values);
 
-        for (let i = 0; i < custom_attribute_names.length ; i++) {
-            algoliaGood[custom_attribute_names[i]] = custom_attribute_values[i];
+        if (addGoodsToAlgolia === true){
+            console.log("New good #" + result.id + " was successfully added to Algolia");
         }
-
-        index.addObjects(algoliaGood, (err, content) => {
-            console.log(`Problem adding good #${algoliaGood._id} to Algolia`);
-        });
-
 
         console.log("New good #" + result.id + " was successfully added to the db");
         return transformGood(result);
