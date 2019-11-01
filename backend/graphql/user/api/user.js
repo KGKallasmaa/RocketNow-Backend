@@ -516,6 +516,7 @@ module.exports = {
         return await shippingService.makeShippingAddressDefault(user._id, location_id);
     },
     makeAddressNotActive:async ({jwt_token, location_id}) => {
-        return await shippingService.makeShippingLocationNotActive(location_id);
+        const user = await userService.findRegularUserByJWT(jwt_token);
+        return await shippingService.makeShippingLocationNotActive(user._id, location_id);
     },
 };
