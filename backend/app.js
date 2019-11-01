@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const graphqlHttp = require('express-graphql');
@@ -12,10 +11,10 @@ const os = require('os');
 const cluster = require('cluster');
 
 //Code we run it we're in the master process
-if (cluster.isMaster){
-   const nrOfCPUs = os.cpus().length;
-    console.log("Server runs on "+nrOfCPUs+" CPUs");
-    for(let i = 0;i < nrOfCPUs; i +=1){
+if (cluster.isMaster) {
+    const nrOfCPUs = os.cpus().length;
+    console.log("Server runs on " + nrOfCPUs + " CPUs");
+    for (let i = 0; i < nrOfCPUs; i += 1) {
         cluster.fork()
     }
 }
@@ -71,21 +70,22 @@ else {
     connectToDatabase();
     function connectToDatabase (){
         mongoose.connect(
-                `mongodb+srv://${process.env.MONGO_USER}:${
-                    process.env.MONGO_PASSWORD
-                    }@nonoline-pi73v.mongodb.net/${process.env.MONGO_DB}?retryWrites=true`
-            ).then(() => {
-                console.log('Successfully connected to the database.');
-                const PORT = 3000;
-                const HOST = ip.address();
-                app.listen(PORT, HOST);
-                // app.listen(PORT);
-                console.log(`Worker ${cluster.worker.id} is running on http://${HOST}:${PORT}`);
-                // console.log(`The backend is running on:${PORT}`);
-            })
-            .catch(err => {
-                console.log(err);
+            `mongodb+srv://${process.env.MONGO_USER}:${
+                process.env.MONGO_PASSWORD
+                }@nonoline-pi73v.mongodb.net/${process.env.MONGO_DB}?retryWrites=true`, {
+                useNewUrlParser: true,
+                useCreateIndex: true,
+                useUnifiedTopology: true
             });
+
+        console.log('Successfully connected to the database.');
+        const PORT = 3000;
+        const HOST = ip.address();
+        app.listen(PORT, HOST);
+        // app.listen(PORT);
+        console.log(`Worker ${cluster.worker.id} is running on http://${HOST}:${PORT}`);
+        // console.log(`The backend is running on:${PORT}`);
+
     }
 
 }
