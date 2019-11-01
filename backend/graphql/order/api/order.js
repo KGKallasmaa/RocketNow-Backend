@@ -334,9 +334,9 @@ module.exports = {
         const ShippingZip = args.checkoutInput.ShippingZip;
         const ShippingCountry = args.checkoutInput.ShippingCountry;
         const ShippingMethod = args.checkoutInput.ShippingMethod;
-        const ShippingCost = args.checkoutInput.ShippingCost;
-        const totalCost = args.checkoutInput.totalCost;
-        const taxCost = args.checkoutInput.taxCost;
+        const ShippingCost = args.checkoutInput.ShippingCost; //without tax
+        const totalCost = args.checkoutInput.totalCost; // with tax
+        const taxCost = args.checkoutInput.taxCost;//contains items tax + shipping tax
         const ShippingCostCurrency = args.checkoutInput.ShippingCurrency;
         const deliveryEstimate_UTC = args.checkoutInput.deliveryEstimate_UTC;
 
