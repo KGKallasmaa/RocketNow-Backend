@@ -7,6 +7,7 @@ const categoryResolver = require('./category/api/category');
 const warehouseResolver = require('./warehouse/api/warehouse');
 const orderResolver = require('./order/api/order');
 const shippingResolver = require('./shipping/api/shipping');
+const estimateResolver =require('./estimate/api/estimate');
 
 
 const rootResolver = {
@@ -18,6 +19,7 @@ const rootResolver = {
   ...searchResolver,
   ...warehouseResolver,
   ...orderResolver,
+  ...estimateResolver,
   ...shippingResolver
 };
 

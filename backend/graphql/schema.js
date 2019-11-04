@@ -180,6 +180,17 @@ type ParcelDeliveryLocation{
 }
 
 """
+##################### Estimate #####################
+"""
+input deliveryEstimate {
+  good_id:ID!
+  quantity:Int!
+  TimezoneOffset_M:Int!
+  lat:Float!,
+  long:Float!
+}
+
+"""
 ##################### Warehouse #####################
 """
 
@@ -349,6 +360,8 @@ type RootQuery {
     DeliveryTimeEstimate(deliverytimeEstimateInput:OrderInput):String!
     
     receiveContactFormMessage(clientName:String!, clientEmail:String!, subject:String!, clientMessage:String!):Boolean!
+    
+    singleProductDeliveryEstimate(deliveryEstimate:deliveryEstimate):[String!]!
 }
 """
 ##################### Root Mutation #####################
