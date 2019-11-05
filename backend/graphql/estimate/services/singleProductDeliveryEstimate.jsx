@@ -2,6 +2,7 @@ require('dotenv').config();
 
 
 const good_schema = require('../../good/models/good');
+const estimate_schema = require('../models/estimate');
 
 
 function convertUTCDateToLocalDate(date, offset_M) {
@@ -173,15 +174,23 @@ const singleProductDeliveryEstimate = async function singleProductDeliveryEstima
     deliveryEstimate = toShippingProviderDelay(deliveryEstimate, good);
 
     //7. Calculate the parcel and address delivery estimates separately
-    //TODO:  Maybe shippo implementaion for addressDelivery?
+    //TODO:  Maybe Shippo implementation for addressDelivery?
 
     let parcelDeliveryEstimate = singleProductParcelDeliveryEstimate(good, quantity,new Date(deliveryEstimate.getTime()), country);
     let addressDeliveryEstimate = singleProductAddressDeliveryEstimate(good, quantity,new Date(deliveryEstimate.getTime()), country);
 
+    const returnableParcelDeliveryEstimate = new estimate_schema.DeliveryEstimate({
+        deliveryTime: parcelDeliveryEstimate.toISOString()
+    });
+    const returnableAddressDeliveryEstimate = new estimate_schema.DeliveryEstimate({
+        deliveryTime: addressDeliveryEstimate.toISOString()
+    });
+
     //Finally: convert Local to UTC
-    return [parcelDeliveryEstimate.toISOString(),addressDeliveryEstimate.toISOString()];
+    return [returnableParcelDeliveryEstimate,returnableAddressDeliveryEstimate];
 };
 
 module.exports = {
     'singleProductDeliveryEstimate': singleProductDeliveryEstimate,
+    'convertUTCDateToLocalDate':convertUTCDateToLocalDate
 };

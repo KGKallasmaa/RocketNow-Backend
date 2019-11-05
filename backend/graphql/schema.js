@@ -185,9 +185,21 @@ type ParcelDeliveryLocation{
 input deliveryEstimate {
   good_id:ID!
   quantity:Int!
-  TimezoneOffset_M:Int!
+  timezoneOffset_M:Int!
   lat:Float!,
   long:Float!
+}
+
+input orderDeliveryEstimate {
+  jwt_token:String!
+  timezoneOffset_M:Int!,
+  shippingCountry:String!,
+  shippingMethod:String!
+}
+
+type DeliveryEstimate {
+    deliveryTime: String!,
+    issueDate: String!
 }
 
 """
@@ -357,11 +369,12 @@ type RootQuery {
     
     orderGoods(orderInput: finalOrderInput!):Order!
     DeliveryCost(deliverycostInput:OrderInput):Float!
-    DeliveryTimeEstimate(deliverytimeEstimateInput:OrderInput):String!
+    
     
     receiveContactFormMessage(clientName:String!, clientEmail:String!, subject:String!, clientMessage:String!):Boolean!
     
-    singleProductDeliveryEstimate(deliveryEstimate:deliveryEstimate):[String!]!
+    singleProductDeliveryEstimate(deliveryEstimate:deliveryEstimate):[DeliveryEstimate!]!
+    orderDeliveryEstimate(deliveryEstimate:orderDeliveryEstimate):DeliveryEstimate!
 }
 """
 ##################### Root Mutation #####################
