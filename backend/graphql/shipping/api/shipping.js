@@ -21,13 +21,6 @@ const user_schemas = require('../../user/models/user');
 const BusinessUser = user_schemas.BusinessUser;
 const RegularUser = user_schemas.RegularUser;
 
-const ONE_MINUTE_in_MS = 60000;
-const ONE_HOUR_in_MS = 3600000;
-const ONE_DAY_in_MS = 86400000;
-const ONE_WEEK_in_MS = 604800000;
-const ONE_MONTH_in_MS = 2592000000;
-const ONE_YEAR_in_MS = 31536000000;
-
 
 const jwt = require('jsonwebtoken');
 const {getCode, getName} = require('country-list');
@@ -695,72 +688,6 @@ module.exports = {
             default:
                 return Error("Shipping method " + args.deliverycostInput.ShippingMethod + " is not supported.")
         }
-    },
-    DeliveryTimeEstimate: async args => {
-        const ONE_DAY_IN_MS = 86400000;
-        const ONE_HOUR_IN_MS = 3600000;
-        /*
-       TODO: debugg
-        //TODO: develop
-       This method calculates a rough estimate of the arrival time of the
-       NoNoLine is a service provider, which means it doesn't itself physically move products.
-       The results depends mostly on partners (Businesses that sell on RocketNow) and 3rd party service partners (e.g Omniva)
-        */
-        const jwt_token = args.deliverytimeEstimateInput.jwt_token;
-        const ShippingCountry = args.deliverytimeEstimateInput.ShippingCountry;
-        const ParcelDeliveryLocation = args.deliverytimeEstimateInput.ParcelDeliveryLocation;
-        const ShippingMethod = args.deliverytimeEstimateInput.ShippingMethod;
-        const TimezoneOffset_MS = args.deliverytimeEstimateInput.TimezoneOffset_M*60000;
-
-        let deliveryTime_UTC = new Date().getTime();
-
-        //1. Find the user
-        const decoded = jwt.decode(jwt_token, process.env.PERSONAL_JWT_KEY);
-
-        const user = await RegularUser.findById(decoded.userId);
-
-        //2. Find the shoppingcart
-        let shoppingcart;
-        if (!user) {
-            shoppingcart = await ShoppingCart.findOne({cart_identifier: decoded.userId});
-        } else {
-            shoppingcart = await ShoppingCart.findOne({cart_identifier: jwt_token});
-        }
-        if (!shoppingcart) return deliveryTime_UTC;
-
-        //3. Calculate the arrival deliveryestimate
-
-        /*
-        The delivery estimate has the following components:
-        1. The time it takes the business to progesses the order:
-        2. The time it takes for the order to be shipped by the provider (e.g Omniva)
-         */
-
-        /*Add processing delay
-        1. Goods are processed M-F from 9am to 5PM.
-        2. It takes 5 minutes per good group. E.g it takes 5 minutes to procees 1 HP book and 5 minutes on procces 2 HP books
-        3. Each business works asyncronsoly from the other.
-        */
-
-        //Time till next workin day
-        const getTimeTillNextWorkDay = function (currentTime) {
-            let localTime = currentTime-TimezoneOffset_MS;
-            let currentTimeAsDate =  new Date(localTime);
-            // Is it after 5 PM (local time)
-            localTime += (currentTimeAsDate.getHours() >= 17) ? (24 -currentTimeAsDate.getHours())*ONE_HOUR_IN_MS+9*ONE_HOUR_IN_MS : 0;
-            currentTimeAsDate =  new Date(localTime);
-
-           //Is it the weekend? (local time) If so calculate time till Monday
-            if (currentTimeAsDate.getDay() === 6 || currentTimeAsDate.getDay() ===7) {
-                localTime += (currentTimeAsDate.getDay() === 6) ? 2*ONE_DAY_IN_MS+9*ONE_HOUR_IN_MS : ONE_DAY_IN_MS+9*ONE_HOUR_IN_MS;
-                return localTime+TimezoneOffset_MS-currentTime;
-            }
-            return localTime+TimezoneOffset_MS-currentTime;
-        };
-        deliveryTime_UTC += getTimeTillNextWorkDay(deliveryTime_UTC);
-
-
-        return deliveryTime_UTC.toString();
     },
     addParcelDeliveryLocation: async ({provider, name, country, x_coordinate, y_coordinate}) => {
         const existingParcelDeliveryLocation = await ParcelDeliveryLocation.findOne({
