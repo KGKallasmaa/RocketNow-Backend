@@ -1,4 +1,4 @@
-FROM node:10-alpine
+FROM node:13-alpine
 
 MAINTAINER karl.gustav1789@gmail.com
 
